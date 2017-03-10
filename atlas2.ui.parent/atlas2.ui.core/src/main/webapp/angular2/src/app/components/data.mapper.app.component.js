@@ -9,98 +9,82 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var core_1 = require('@angular/core');
-var mapping_management_service_1 = require('../services/mapping.management.service');
-var error_handler_service_1 = require('../services/error.handler.service');
+var config_model_1 = require('../models/config.model');
 var document_definition_component_1 = require('./document.definition.component');
 var mapping_detail_component_1 = require('./mapping.detail.component');
 var modal_window_component_1 = require('./modal.window.component');
 var data_mapper_error_component_1 = require('./data.mapper.error.component');
+var line_machine_component_1 = require('./line.machine.component');
+var mapping_selection_component_1 = require('./mapping.selection.component');
+var toolbar_component_1 = require('./toolbar.component');
 var DataMapperAppComponent = (function () {
-    function DataMapperAppComponent(mapperService, errorService) {
-        this.mapperService = mapperService;
-        this.errorService = errorService;
+    function DataMapperAppComponent() {
     }
     DataMapperAppComponent.prototype.ngOnInit = function () {
         var _this = this;
-        this.mapperService.errorService = this.errorService;
-        this.errorPanel.errorService = this.errorService;
-        this.docDefInput.parentComponent = this;
-        this.docDefInput.mapperService = this.mapperService;
-        this.docDefInput.isInput = true;
-        this.docDefOutput.parentComponent = this;
-        this.docDefOutput.mapperService = this.mapperService;
-        this.mappingDetailComponent.parentComponent = this;
-        this.mappingDetailComponent.mapperService = this.mapperService;
-        this.mapperService.getDocumentDefinition(true, function (d) {
-            _this.docDefInput.docDef = d;
-        });
-        this.mapperService.getDocumentDefinition(false, function (d) {
-            _this.docDefOutput.docDef = d;
-        });
-        this.mapperService.initializeMappings(function () {
-            _this.docDefInput.updateFromSelections();
-            _this.docDefOutput.updateFromSelections();
+        this.toolbarComponent.parentComponent = this;
+        this.mappingDetailComponent.modalWindow = this.modalWindow;
+        this.cfg.mappingService.mappingSelectionRequired$.subscribe(function (mappings) {
+            _this.selectMapping(mappings);
         });
     };
-    DataMapperAppComponent.prototype.documentSelectionChanged = function (component) {
+    DataMapperAppComponent.prototype.selectMapping = function (mappingsForField) {
+        this.modalWindow.reset();
+        this.modalWindow.parentComponent = this;
+        this.modalWindow.headerText = "Select Mapping";
+        this.modalWindow.nestedComponentInitializedCallback = function (mw) {
+            var self = mw.parentComponent;
+            var c = mw.nestedComponent;
+            c.mappings = mappingsForField;
+            c.selectedMapping = mappingsForField[0];
+        };
+        this.modalWindow.nestedComponentType = mapping_selection_component_1.MappingSelectionComponent;
+        this.modalWindow.okButtonHandler = function (mw) {
+            var self = mw.parentComponent;
+            var c = mw.nestedComponent;
+            var mapping = c.selectedMapping;
+            self.cfg.mappingService.selectMapping(mapping, false);
+        };
+        this.modalWindow.cancelButtonHandler = function (mw) {
+            var self = mw.parentComponent;
+            self.cfg.mappingService.selectMapping(null, false);
+        };
+        this.modalWindow.show();
+    };
+    DataMapperAppComponent.prototype.updateFromConfig = function () {
+        var _this = this;
+        this.lineMachine.updateHeight();
+        this.mappingDetailComponent.updateHeight();
+        // update the mapping line drawing after our fields have redrawn themselves
+        // without this, the x/y from the field dom elements is messed up / misaligned.
+        setTimeout(function () { _this.lineMachine.redrawLinesForMappings(); }, 1);
+    };
+    DataMapperAppComponent.prototype.buttonClickedHandler = function (action, component) {
         var self = component.parentComponent;
-        //self.modalWindow.show();
-        var isInput = (component == self.docDefInput);
-        console.log(isInput ? "input selection changed" : "output selection changed");
-        var fieldToFind = null;
-        var mapping = self.mappingDetailComponent.mapping;
-        if (mapping == null) {
-            if ((self.docDefInput.selectedFields.length == 1) && (self.docDefOutput.selectedFields.length == 0)) {
-                fieldToFind = self.docDefInput.selectedFields[0];
-            }
-            if ((self.docDefInput.selectedFields.length == 0) && (self.docDefOutput.selectedFields.length == 1)) {
-                fieldToFind = self.docDefOutput.selectedFields[0];
-            }
-            mapping = (fieldToFind == null) ? null : self.mapperService.findMappingForField(fieldToFind.name, isInput);
-            if (mapping != null) {
-                console.log("Found existing mapping");
-            }
-            if (mapping == null) {
-                console.log("creating new mapping");
-                mapping = self.mapperService.createMapping();
-                mapping.inputFields = [].concat(self.docDefInput.selectedFields);
-                mapping.outputFields = [].concat(self.docDefOutput.selectedFields);
-            }
+        if ("add" == action) {
+            console.log("Creating new mapping.");
+            self.cfg.mappings.activeMapping = self.cfg.mappingService.createMapping();
+            self.cfg.showMappingDetailTray = true;
         }
-        else {
-            mapping.inputFields = [].concat(self.docDefInput.selectedFields);
-            mapping.outputFields = [].concat(self.docDefOutput.selectedFields);
-        }
-        self.mappingDetailComponent.mapping = mapping;
-        self.updateDocumentDefinitionComponents([].concat(mapping.inputFields), [].concat(mapping.outputFields), self);
-    };
-    DataMapperAppComponent.prototype.mappingDetailSelectionChanged = function (component) {
-        console.log("Current mapping changed.");
-        var self = component.parentComponent;
-        console.log("self now");
-        console.log(self);
-        var mapping = component.mapping;
-        if (mapping == null) {
-            self.updateDocumentDefinitionComponents([], [], self);
-        }
-        else {
-            self.updateDocumentDefinitionComponents([].concat(mapping.inputFields), [].concat(mapping.outputFields), self);
+        else if ("showDetails" == action) {
+            self.cfg.showMappingDetailTray = !self.cfg.showMappingDetailTray;
         }
     };
-    DataMapperAppComponent.prototype.updateDocumentDefinitionComponents = function (inputSelectedFields, outputSelectedFields, self) {
-        console.log("Updating def components selections, input length: " + inputSelectedFields.length + ", output length: " + outputSelectedFields.length);
-        self.docDefInput.selectedFields = inputSelectedFields;
-        self.docDefInput.updateFromSelections();
-        self.docDefOutput.selectedFields = outputSelectedFields;
-        self.docDefOutput.updateFromSelections();
-    };
+    __decorate([
+        core_1.Input(), 
+        __metadata('design:type', config_model_1.ConfigModel)
+    ], DataMapperAppComponent.prototype, "cfg", void 0);
+    __decorate([
+        core_1.ViewChild('lineMachine'), 
+        __metadata('design:type', line_machine_component_1.LineMachineComponent)
+    ], DataMapperAppComponent.prototype, "lineMachine", void 0);
     __decorate([
         core_1.ViewChild('errorPanel'), 
         __metadata('design:type', data_mapper_error_component_1.DataMapperErrorComponent)
     ], DataMapperAppComponent.prototype, "errorPanel", void 0);
     __decorate([
         core_1.ViewChild('modalWindow'), 
-        __metadata('design:type', modal_window_component_1.TestModalComponent)
+        __metadata('design:type', modal_window_component_1.ModalWindowComponent)
     ], DataMapperAppComponent.prototype, "modalWindow", void 0);
     __decorate([
         core_1.ViewChild('docDefInput'), 
@@ -114,13 +98,16 @@ var DataMapperAppComponent = (function () {
         core_1.ViewChild('mappingDetailComponent'), 
         __metadata('design:type', mapping_detail_component_1.MappingDetailComponent)
     ], DataMapperAppComponent.prototype, "mappingDetailComponent", void 0);
+    __decorate([
+        core_1.ViewChild('toolbarComponent'), 
+        __metadata('design:type', toolbar_component_1.ToolbarComponent)
+    ], DataMapperAppComponent.prototype, "toolbarComponent", void 0);
     DataMapperAppComponent = __decorate([
         core_1.Component({
-            selector: 'my-app',
-            template: "\n  \t<div style='height:100%;'>\n  \t\t<div class=\"row\"><data-mapper-error #errorPanel></data-mapper-error></div>\n  \t\t<div class=\"row\">\n\t  \t\t<div class=\"col-md-12\">\n\t  \t\t\t<test-modal #modalWindow></test-modal>\n\t  \t\t</div>\n  \t\t</div>\n  \t\t<div class=\"row\" style='height:100%;'>\n\t  \t\t<div class=\"col-md-1\"></div>\n\t  \t\t<div class=\"col-md-3\">  \t\t\n\t\t  \t\t<document-definition #docDefInput [selectionChanged]=\"documentSelectionChanged\"></document-definition>\n\t\t  \t</div>\n\t\t  \t<div class=\"col-md-1\"></div>\n\t\t  \t<div class=\"col-md-3\">\n\t\t  \t\t<document-definition #docDefOutput [selectionChanged]=\"documentSelectionChanged\"></document-definition>\n\t\t  \t</div>\n\t\t  \t<div class=\"col-md-1\"></div>\n\t\t  \t<div class=\"col-md-3\" style=\"padding:0px; height:100%\">\n\t\t  \t\t<mapping-detail #mappingDetailComponent [selectionChanged]=\"mappingDetailSelectionChanged\"></mapping-detail>\n\t\t  \t</div>\n\t\t </div>\n  \t</div>\n  ",
-            providers: [mapping_management_service_1.MappingManagementService, error_handler_service_1.ErrorHandlerService]
+            selector: 'data-mapper',
+            template: "\n  \t<toolbar [buttonClickedHandler]=\"buttonClickedHandler\" #toolbarComponent [cfg]=\"cfg\"></toolbar>\n  \t<div style='height:100%;'>\n  \t\t<div class=\"row\"><data-mapper-error #errorPanel [errorService]=\"cfg.errorService\"></data-mapper-error></div>\n  \t\t<div class=\"row\">\n\t  \t\t<div class=\"col-md-12\"><modal-window #modalWindow></modal-window></div>\n  \t\t</div>\n  \t\t<div class=\"row\" style='height:100%;'>\n\t  \t\t<div class=\"col-md-9\">  \t\t\n\t  \t\t\t<div style=\"float:left; width:40%; padding-left:10px;\">\n\t\t  \t\t\t<document-definition #docDefInput [cfg]=\"cfg\"\n\t\t  \t\t\t\t[docDef]=\"cfg.inputDoc\" [lineMachine]=\"lineMachine\"></document-definition>\n\t\t  \t\t</div>\n\t\t  \t\t<div style=\"float:left; width:20%; margin-top:20px\">\n\t\t  \t\t\t<line-machine #lineMachine [cfg]=\"cfg\" \n\t\t  \t\t\t\t[docDefInput]=\"docDefInput\" [docDefOutput]=\"docDefOutput\"></line-machine>\n\t\t  \t\t</div>\n\t\t  \t\t<div style=\"float:left; width:40%; padding-right:10px;\">\n\t\t  \t\t\t<document-definition #docDefOutput [cfg]=\"cfg\"\n\t\t  \t\t\t\t[docDef]=\"cfg.outputDoc\" [lineMachine]=\"lineMachine\"></document-definition>\n\t\t  \t\t</div>\n\t\t  \t\t<div style=\"clear:both; height:0px;\">&nbsp;</div>\n\t\t  \t</div>\n\t\t  \t<div class=\"col-md-3\" style=\"padding:0px;\">\n\t\t  \t\t<mapping-detail #mappingDetailComponent [cfg]=\"cfg\"></mapping-detail>\n\t\t  \t</div>\n\t\t </div>\n  \t</div>\n  "
         }), 
-        __metadata('design:paramtypes', [mapping_management_service_1.MappingManagementService, error_handler_service_1.ErrorHandlerService])
+        __metadata('design:paramtypes', [])
     ], DataMapperAppComponent);
     return DataMapperAppComponent;
 }());

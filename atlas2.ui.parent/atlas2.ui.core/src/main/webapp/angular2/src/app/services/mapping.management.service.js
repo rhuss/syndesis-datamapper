@@ -13,45 +13,33 @@ var http_1 = require('@angular/http');
 require('rxjs/add/operator/toPromise');
 var Rx_1 = require('rxjs/Rx');
 require('rxjs/add/observable/forkJoin');
-var field_model_1 = require('../models/field.model');
-var document_definition_model_1 = require('../models/document.definition.model');
-var mapping_model_1 = require('../models/mapping.model');
+var Subject_1 = require('rxjs/Subject');
+var mapping_serializer_1 = require('./mapping.serializer');
 var MappingManagementService = (function () {
     function MappingManagementService(http) {
         this.http = http;
-        this.mappings = [];
-        this.uuidCounter = 0;
-        this.mappingUUID = null;
+        this.mappingUpdatedSource = new Subject_1.Subject();
+        this.mappingUpdated$ = this.mappingUpdatedSource.asObservable();
+        this.activeMappingChangedSource = new Subject_1.Subject();
+        this.activeMappingChanged$ = this.activeMappingChangedSource.asObservable();
+        this.mappingSelectionRequiredSource = new Subject_1.Subject();
+        this.mappingSelectionRequired$ = this.mappingSelectionRequiredSource.asObservable();
         this.headers = new http_1.Headers();
         this.headers.append("Content-Type", "application/json");
     }
-    MappingManagementService.prototype.getDocumentDefinition = function (isInput, initializedCallback) {
-        var _this = this;
-        var url = "http://localhost:8585/v2/atlas/java/class?className=com.mediadriver.atlas.java.service.v2.TestAddress";
-        url = isInput ? url : "http://localhost:8585/v2/atlas/java/class?className=com.mediadriver.atlas.java.service.v2.TestContact";
-        this.http.get(url, { headers: this.headers }).toPromise()
-            .then(function (res) { _this.extractDocumentDefinitionData(res, initializedCallback); })
-            .catch(function (error) { _this.handleError("Error occurred while retrieving document fields.", error); });
-    };
-    MappingManagementService.prototype.extractDocumentDefinitionData = function (res, initializedCallback) {
-        var body = res.json();
-        var fields = [];
-        for (var _i = 0, _a = body.JavaClass.fields.field; _i < _a.length; _i++) {
-            var f = _a[_i];
-            fields.push(new field_model_1.Field(f.name, f.type));
-        }
-        var d = new document_definition_model_1.DocumentDefinition(body.JavaClass.className, fields);
-        initializedCallback(d);
-    };
-    MappingManagementService.prototype.initializeMappings = function (initializedCallback) {
+    MappingManagementService.prototype.initialize = function () {
         var _this = this;
         console.log("Initializing mappings.");
-        var url = "http://localhost:8585/v2/atlas/mappings?filter=UI";
+        var startTime = Date.now();
+        this.cfg.documentService.updateFromSelectedFields$.subscribe(function () {
+            _this.fieldSelectionChanged();
+        });
+        var url = this.cfg.baseMappingServiceUrl + "mappings?filter=UI";
         this.http.get(url, { headers: this.headers }).toPromise()
-            .then(function (res) { return _this.extractMappings(res, initializedCallback); })
+            .then(function (res) { return _this.extractMappings(res, startTime); })
             .catch(function (error) { _this.handleError("Error occurred while retrieving mappings.", error); });
     };
-    MappingManagementService.prototype.extractMappings = function (res, initializedCallback) {
+    MappingManagementService.prototype.extractMappings = function (res, startTime) {
         var _this = this;
         var body = res.json();
         var entries = body.StringMap.stringMapEntry;
@@ -60,7 +48,11 @@ var MappingManagementService = (function () {
             var entry = entries_1[_i];
             mappingNames.push(entry.name);
         }
-        var baseURL = "http://localhost:8585/v2/atlas/mapping/";
+        if (mappingNames.length == 0) {
+            console.log("No pre-existing mapping exists.");
+            return;
+        }
+        var baseURL = this.cfg.baseMappingServiceUrl + "mapping/";
         var operations = [];
         for (var _a = 0, mappingNames_1 = mappingNames; _a < mappingNames_1.length; _a++) {
             var mappingName = mappingNames_1[_a];
@@ -74,134 +66,63 @@ var MappingManagementService = (function () {
                 return;
             }
             console.log("Initializing from " + data.length + " fetched mappings.");
-            for (var _i = 0, data_1 = data; _i < data_1.length; _i++) {
-                var d = data_1[_i];
-                _this.mappingUUID = d.AtlasMapping.name;
-                for (var _a = 0, _b = d.AtlasMapping.fieldMappings.fieldMapping; _a < _b.length; _a++) {
-                    var fieldMapping = _b[_a];
-                    var m = _this.createMapping();
-                    m.saved = true;
-                    m.inputFields.push(new field_model_1.Field(fieldMapping.inputField.field.name, fieldMapping.inputField.field.type));
-                    m.outputFields.push(new field_model_1.Field(fieldMapping.outputField.field.name, fieldMapping.outputField.field.type));
-                    _this.mappings.push(m);
-                }
+            _this.cfg.mappings.mappings = _this.cfg.mappings.mappings.concat(mapping_serializer_1.MappingSerializer.deserializeMappings(data));
+            if (data && data.length) {
+                _this.cfg.mappings.mappingUUID = data[0].AtlasMapping.name;
             }
-            initializedCallback();
+            console.log("Finished loading mappings in " + (Date.now() - startTime) + "ms.");
+            _this.mappingUpdatedSource.next();
         }, function (err) { _this.handleError("Error occurred while retrieving a mapping.", err); });
     };
     MappingManagementService.prototype.printMappings = function (reason) {
-        var msg = "Mapping status for '" + reason + "', current mapping count: " + this.mappings.length;
-        for (var i = 0; i < this.mappings.length; i++) {
-            msg += "\n\tMapping #" + i + ": " + this.printMapping(this.mappings[i]);
+        var mappings = this.cfg.mappings.mappings;
+        var msg = "Mapping status for '" + reason +
+            "', current mapping count: " + mappings.length;
+        for (var i = 0; i < mappings.length; i++) {
+            msg += "\n\tMapping #" + i + ": " + this.printMapping(mappings[i]);
         }
         console.log(msg);
     };
     MappingManagementService.prototype.printMapping = function (m) {
+        if (m == null) {
+            return "[no mapping]";
+        }
         var inputs = "";
-        for (var _i = 0, _a = m.inputFields; _i < _a.length; _i++) {
-            var f = _a[_i];
-            inputs += f.name + ", ";
+        for (var _i = 0, _a = m.inputFieldPaths; _i < _a.length; _i++) {
+            var fieldPath = _a[_i];
+            inputs += fieldPath + ", ";
         }
         var outputs = "";
-        for (var _b = 0, _c = m.outputFields; _b < _c.length; _b++) {
-            var f = _c[_b];
-            outputs += f.name + ", ";
+        for (var _b = 0, _c = m.outputFieldPaths; _b < _c.length; _b++) {
+            var fieldPath = _c[_b];
+            outputs += fieldPath + ", ";
         }
         return "uuid: " + m.uuid + ", inputs: {" + inputs + "}, outputs {" + outputs + "}.";
     };
     MappingManagementService.prototype.saveMapping = function (m) {
+        var startTime = Date.now();
         console.log("Saving mapping: " + this.printMapping(m));
         this.removeMappingInternal(m);
-        this.mappings.push(m);
         this.printMappings("Saved Mapping.");
+        this.cfg.mappings.mappings.push(m);
         this.saveMappingToService(m);
     };
     MappingManagementService.prototype.saveMappingToService = function (m) {
         var _this = this;
-        var payload = this.makeSavePayload();
+        var startTime = Date.now();
+        var payload = mapping_serializer_1.MappingSerializer.serializeMappings(this.cfg.mappings, this.cfg.inputDoc, this.cfg.outputDoc);
         var jsonVersion = JSON.stringify(payload);
-        //var jsonPretty = JSON.stringify(JSON.parse(jsonVersion),null,2); 
-        var url = "http://localhost:8585/v2/atlas/mapping";
+        var jsonPretty = JSON.stringify(JSON.parse(jsonVersion), null, 2);
+        console.log("JSON for saved mapping.", jsonPretty);
+        var url = this.cfg.baseMappingServiceUrl + "mapping";
         this.http.put(url, jsonVersion, { headers: this.headers }).toPromise()
             .then(function (res) {
-            console.log("Got put rest response.");
-            console.log(res);
             m.saved = true;
+            _this.deselectMapping();
+            console.log("Saved mappings to service in " + (Date.now() - startTime) + "ms.");
+            _this.mappingUpdatedSource.next();
         })
             .catch(function (error) { _this.handleError("Error occurred while saving mapping.", error); });
-    };
-    MappingManagementService.prototype.makeSavePayload = function () {
-        /* //example payload
-        {
-            "AtlasMapping": {
-                "jsonType": "com.mediadriver.atlas.v2.AtlasMapping",
-                "fieldMappings": {
-                        "fieldMapping": [
-                            {
-                                "inputField": {
-                                    "jsonType": "com.mediadriver.atlas.v2.MappedField",
-                                    "field": {
-                                        "jsonType": "com.mediadriver.atlas.v2.MockField",
-                                        "name": "foo",
-                                        "value": "bar"
-                                    },
-                                    "fieldActions": []
-                                },
-                                "outputField": { } //same as input field..
-                            }
-                        ]
-                    }
-                },
-                "name": "junit4"
-            }
-        }
-        */ //end example payload
-        var jsonMappings = [];
-        for (var _i = 0, _a = this.mappings; _i < _a.length; _i++) {
-            var m = _a[_i];
-            var mappingFieldActions = [];
-            var mappingFieldActions = [];
-            var jsonMapping = {
-                "inputField": {
-                    "jsonType": "com.mediadriver.atlas.v2.MappedField",
-                    "field": this.createPayloadForFields(m.inputFields),
-                    "fieldActions": mappingFieldActions
-                },
-                "outputField": {
-                    "jsonType": "com.mediadriver.atlas.v2.MappedField",
-                    "field": this.createPayloadForFields(m.outputFields),
-                    "fieldActions": mappingFieldActions
-                }
-            };
-            jsonMappings.push(jsonMapping);
-        }
-        if (this.mappingUUID == null) {
-            this.mappingUUID = "UI." + Math.floor((Math.random() * 1000000) + 1).toString();
-        }
-        var payload = {
-            "AtlasMapping": {
-                "jsonType": "com.mediadriver.atlas.v2.AtlasMapping",
-                "name": this.mappingUUID,
-                "fieldMappings": {
-                    "fieldMapping": jsonMappings
-                }
-            }
-        };
-        return payload;
-    };
-    MappingManagementService.prototype.createPayloadForFields = function (fields) {
-        var fieldsJson = [];
-        for (var _i = 0, fields_1 = fields; _i < fields_1.length; _i++) {
-            var f = fields_1[_i];
-            var flatWrapper = {
-                "jsonType": "com.mediadriver.atlas.v2.MockField",
-                "name": f.name,
-                "type": f.type
-            };
-            //TODO: for now just return the first field
-            return flatWrapper;
-        }
-        return fieldsJson;
     };
     MappingManagementService.prototype.removeMapping = function (m) {
         console.log("Removing mapping: " + this.printMapping(m));
@@ -209,35 +130,32 @@ var MappingManagementService = (function () {
         if (m.saved) {
             this.saveMappingToService(m);
         }
+        else {
+            this.deselectMapping();
+        }
     };
     MappingManagementService.prototype.removeMappingInternal = function (m) {
-        for (var i = 0; i < this.mappings.length; i++) {
-            if (this.mappings[i].uuid == m.uuid) {
-                console.log("Removing mapping: " + this.printMapping(this.mappings[i]));
-                this.mappings.splice(i, 1);
+        var mappings = this.cfg.mappings.mappings;
+        for (var i = 0; i < mappings.length; i++) {
+            if (mappings[i].uuid == m.uuid) {
+                mappings.splice(i, 1);
                 break;
             }
         }
     };
-    MappingManagementService.prototype.findMappingForField = function (fieldName, isInput) {
-        console.log("Finding mapping for field: " + fieldName + ", input: " + isInput + ", current mapping count: " + this.mappings.length);
-        for (var _i = 0, _a = this.mappings; _i < _a.length; _i++) {
+    MappingManagementService.prototype.findMappingsForField = function (fieldPath, isInput) {
+        var mappingsForField = [];
+        for (var _i = 0, _a = this.cfg.mappings.mappings; _i < _a.length; _i++) {
             var m = _a[_i];
-            var fields = isInput ? m.inputFields : m.outputFields;
-            for (var _b = 0, fields_2 = fields; _b < fields_2.length; _b++) {
-                var f = fields_2[_b];
-                if (f.name == fieldName) {
-                    return m;
+            var fieldPaths = isInput ? m.inputFieldPaths : m.outputFieldPaths;
+            for (var _b = 0, fieldPaths_1 = fieldPaths; _b < fieldPaths_1.length; _b++) {
+                var currentFieldPath = fieldPaths_1[_b];
+                if (currentFieldPath == fieldPath) {
+                    mappingsForField.push(m);
                 }
             }
         }
-        return null;
-    };
-    MappingManagementService.prototype.createMapping = function () {
-        var m = new mapping_model_1.MappingModel();
-        m.uuid = "mapping #" + this.uuidCounter;
-        this.uuidCounter++;
-        return m;
+        return mappingsForField;
     };
     MappingManagementService.prototype.handleError = function (message, error) {
         if (error instanceof http_1.Response) {
@@ -251,19 +169,121 @@ var MappingManagementService = (function () {
                 message += " (Not Found)";
             }
         }
-        this.errorService.error(message, error);
+        this.cfg.errorService.error(message, error);
     };
     MappingManagementService.prototype.getMappedFields = function (isInput) {
         var result = [];
-        for (var _i = 0, _a = this.mappings; _i < _a.length; _i++) {
+        for (var _i = 0, _a = this.cfg.mappings.mappings; _i < _a.length; _i++) {
             var m = _a[_i];
-            var fields = isInput ? m.inputFields : m.outputFields;
-            for (var _b = 0, fields_3 = fields; _b < fields_3.length; _b++) {
-                var f = fields_3[_b];
-                result.push(f.name);
+            var fieldPaths = isInput ? m.inputFieldPaths : m.outputFieldPaths;
+            for (var _b = 0, fieldPaths_2 = fieldPaths; _b < fieldPaths_2.length; _b++) {
+                var fieldPath = fieldPaths_2[_b];
+                result.push(fieldPath);
             }
         }
         return result;
+    };
+    MappingManagementService.prototype.removeMappedField = function (fieldPath, isInput) {
+        var fieldPaths = (isInput ? this.cfg.mappings.activeMapping.inputFieldPaths
+            : this.cfg.mappings.activeMapping.outputFieldPaths);
+        for (var i = 0; i < fieldPaths.length; i++) {
+            if (fieldPaths[i] == fieldPath) {
+                fieldPaths.splice(i, 1);
+                break;
+            }
+        }
+        var field = isInput ? this.cfg.inputDoc.getField(fieldPath) : this.cfg.outputDoc.getField(fieldPath);
+        field.selected = false;
+        this.activeMappingChangedSource.next(false);
+    };
+    MappingManagementService.prototype.addMappedField = function (fieldPath, isInput) {
+        var docDef = isInput ? this.cfg.inputDoc : this.cfg.outputDoc;
+        fieldPath = (fieldPath == null) ? docDef.allFields[0].path : fieldPath;
+        var fieldsPaths = (isInput ? this.cfg.mappings.activeMapping.inputFieldPaths
+            : this.cfg.mappings.activeMapping.outputFieldPaths);
+        fieldsPaths.push(fieldPath);
+        var field = isInput ? docDef.getField(fieldPath) : docDef.getField(fieldPath);
+        if (field != null) {
+            field.selected = true;
+        }
+        this.cfg.mappings.activeMapping.updateSeparatorIndexes();
+        this.activeMappingChangedSource.next(false);
+    };
+    MappingManagementService.prototype.createMapping = function () {
+        return mapping_serializer_1.MappingSerializer.createMapping();
+    };
+    MappingManagementService.prototype.deselectMapping = function () {
+        this.cfg.mappings.activeMapping = null;
+        this.cfg.inputDoc.clearSelectedFields();
+        this.cfg.outputDoc.clearSelectedFields();
+        this.activeMappingChangedSource.next(false);
+    };
+    MappingManagementService.prototype.fieldSelectionChanged = function () {
+        var mapping = this.cfg.mappings.activeMapping;
+        this.printMapping(mapping);
+        var mappingIsNew = false;
+        var selectedInputFields = this.cfg.inputDoc.getSelectedFields();
+        var selectedOutputFields = this.cfg.outputDoc.getSelectedFields();
+        if (mapping == null) {
+            if ((selectedInputFields.length == 0) && (selectedOutputFields.length == 0)) {
+                //no mapping, exit
+                this.selectMapping(mapping, false);
+                return;
+            }
+            var fieldToFind = null;
+            var isInput = true;
+            if ((selectedInputFields.length == 1) && (selectedOutputFields.length == 0)) {
+                fieldToFind = selectedInputFields[0];
+            }
+            if ((selectedInputFields.length == 0) && (selectedOutputFields.length == 1)) {
+                fieldToFind = selectedOutputFields[0];
+                isInput = false;
+            }
+            var mappingsForField = (fieldToFind == null) ? null
+                : this.findMappingsForField(fieldToFind.path, isInput);
+            if (mappingsForField && mappingsForField.length > 1) {
+                console.log("Found " + mappingsForField.length + " existing mappings.");
+                this.mappingSelectionRequiredSource.next(mappingsForField);
+                return;
+            }
+            else if (mappingsForField && mappingsForField.length == 1) {
+                console.log("Found existing mapping.");
+                mapping = mappingsForField[0];
+            }
+            else if (mappingsForField == null || mappingsForField.length == 0) {
+                console.log("Creating new mapping.");
+                mappingIsNew = true;
+                mapping = this.createMapping();
+                mapping.inputFieldPaths = [].concat(this.getFieldPaths(selectedInputFields));
+                mapping.outputFieldPaths = [].concat(this.getFieldPaths(selectedOutputFields));
+            }
+        }
+        else {
+            mapping.inputFieldPaths = [].concat(this.getFieldPaths(selectedInputFields));
+            mapping.outputFieldPaths = [].concat(this.getFieldPaths(selectedOutputFields));
+        }
+        this.selectMapping(mapping, mappingIsNew);
+    };
+    MappingManagementService.prototype.selectMapping = function (m, mappingIsNew) {
+        this.cfg.mappings.activeMapping = m;
+        this.cfg.showMappingDetailTray = true;
+        if (m == null) {
+            this.cfg.inputDoc.clearSelectedFields();
+            this.cfg.outputDoc.clearSelectedFields();
+        }
+        else {
+            this.cfg.inputDoc.selectFields(m.inputFieldPaths);
+            this.cfg.outputDoc.selectFields(m.outputFieldPaths);
+        }
+        this.activeMappingChangedSource.next(mappingIsNew);
+    };
+    MappingManagementService.prototype.getFieldPaths = function (fields) {
+        var paths = [];
+        for (var _i = 0, fields_1 = fields; _i < fields_1.length; _i++) {
+            var field = fields_1[_i];
+            paths.push(field.path);
+        }
+        return paths;
     };
     MappingManagementService = __decorate([
         core_1.Injectable(), 

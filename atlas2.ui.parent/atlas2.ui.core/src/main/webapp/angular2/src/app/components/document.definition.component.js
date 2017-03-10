@@ -9,83 +9,80 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var core_1 = require('@angular/core');
+var platform_browser_1 = require('@angular/platform-browser');
+var config_model_1 = require('../models/config.model');
 var document_definition_model_1 = require('../models/document.definition.model');
-var mapping_management_service_1 = require('../services/mapping.management.service');
+var line_machine_component_1 = require('./line.machine.component');
 var DocumentDefinitionComponent = (function () {
-    function DocumentDefinitionComponent() {
-        this.isInput = false;
-        this.selectedFields = [];
+    function DocumentDefinitionComponent(sanitizer) {
+        this.sanitizer = sanitizer;
+        this.searchMode = false;
+        this.searchFilter = "";
     }
-    DocumentDefinitionComponent.prototype.ngAfterViewChecked = function () {
-        var components = this.fieldComponents.toArray();
-        for (var _i = 0, components_1 = components; _i < components_1.length; _i++) {
-            var c = components_1[_i];
-            c.parentComponent = this;
+    DocumentDefinitionComponent.prototype.getFieldCount = function () {
+        if (this.docDef && this.docDef.allFields) {
+            return this.docDef.allFields.length;
         }
+        return 0;
     };
-    DocumentDefinitionComponent.prototype.fieldClicked = function (c) {
-        var self = c.parentComponent;
-        var f = c.field;
-        /* remove this bit after 1.8.0 demo */
-        self.selectedFields = [];
-        self.selectedFields.push(f);
-        /* end bit to remove */
-        /* this is for supporting multiple fields per mapping, will put this back in after 1.8.0 demo
-        var wasSelected: boolean = false;
-        for (var i = 0; i < self.selectedFields.length; i++) {
-            var selectedField: Field = self.selectedFields[i];
-            if (selectedField.name == f.name) {
-                self.selectedFields.splice(i, 1);
-                wasSelected = true;
-                break;
+    DocumentDefinitionComponent.prototype.getFieldDetailComponent = function (fieldPath) {
+        for (var _i = 0, _a = this.fieldComponents.toArray(); _i < _a.length; _i++) {
+            var c = _a[_i];
+            var returnedComponent = c.getFieldDetailComponent(fieldPath);
+            if (returnedComponent != null) {
+                return returnedComponent;
             }
         }
-        if (wasSelected == false) {
-            self.selectedFields.push(f);
-        }
-        */
-        self.updateFromSelections();
-        self.selectionChanged(self);
+        return null;
     };
-    DocumentDefinitionComponent.prototype.isSelected = function (fieldName) {
-        for (var _i = 0, _a = this.selectedFields; _i < _a.length; _i++) {
-            var selectedField = _a[_i];
-            if (selectedField.name == fieldName) {
-                return true;
-            }
+    DocumentDefinitionComponent.prototype.getElementPosition = function () {
+        var x = 0;
+        var y = 0;
+        var el = this.documentDefinitionElement.nativeElement;
+        while (el != null) {
+            x += el.offsetLeft;
+            y += el.offsetTop;
+            el = el.offsetParent;
         }
-        return false;
+        return { "x": x, "y": y };
     };
-    DocumentDefinitionComponent.prototype.updateFromSelections = function () {
-        var components = this.fieldComponents.toArray();
-        var fieldsInMappings = this.mapperService.getMappedFields(this.isInput);
-        for (var _i = 0, components_2 = components; _i < components_2.length; _i++) {
-            var c = components_2[_i];
-            var isSelected = this.isSelected(c.field.name);
-            c.updateSelection(isSelected);
-            c.partOfMapping = (fieldsInMappings.indexOf(c.field.name) != -1);
+    DocumentDefinitionComponent.prototype.getFieldDetailComponentPosition = function (fieldPath) {
+        var c = this.getFieldDetailComponent(fieldPath);
+        var fieldElementAbsPosition = c.getElementPosition();
+        var myAbsPosition = this.getElementPosition();
+        return { "x": (fieldElementAbsPosition.x - myAbsPosition.x), "y": (fieldElementAbsPosition.y - myAbsPosition.y) };
+    };
+    DocumentDefinitionComponent.prototype.search = function (searchFilter) {
+        this.cfg.documentService.updateSearch(searchFilter, this.docDef.isInput);
+    };
+    DocumentDefinitionComponent.prototype.clearSearch = function () {
+        this.cfg.documentService.updateSearch(null, this.docDef.isInput);
+        this.searchFilter = "";
+    };
+    DocumentDefinitionComponent.prototype.toggleSearch = function () {
+        this.searchMode = !this.searchMode;
+        if (!this.searchMode) {
+            this.clearSearch();
         }
+        this.searchIconStyle = !this.searchMode ? null
+            : this.sanitizer.bypassSecurityTrustStyle("color:#5CBADF;");
     };
     __decorate([
         core_1.Input(), 
-        __metadata('design:type', core_1.Component)
-    ], DocumentDefinitionComponent.prototype, "parentComponent", void 0);
+        __metadata('design:type', config_model_1.ConfigModel)
+    ], DocumentDefinitionComponent.prototype, "cfg", void 0);
     __decorate([
         core_1.Input(), 
         __metadata('design:type', document_definition_model_1.DocumentDefinition)
     ], DocumentDefinitionComponent.prototype, "docDef", void 0);
     __decorate([
         core_1.Input(), 
-        __metadata('design:type', Function)
-    ], DocumentDefinitionComponent.prototype, "selectionChanged", void 0);
+        __metadata('design:type', line_machine_component_1.LineMachineComponent)
+    ], DocumentDefinitionComponent.prototype, "lineMachine", void 0);
     __decorate([
-        core_1.Input(), 
-        __metadata('design:type', mapping_management_service_1.MappingManagementService)
-    ], DocumentDefinitionComponent.prototype, "mapperService", void 0);
-    __decorate([
-        core_1.Input(), 
-        __metadata('design:type', Boolean)
-    ], DocumentDefinitionComponent.prototype, "isInput", void 0);
+        core_1.ViewChild('documentDefinitionElement'), 
+        __metadata('design:type', core_1.ElementRef)
+    ], DocumentDefinitionComponent.prototype, "documentDefinitionElement", void 0);
     __decorate([
         core_1.ViewChildren('fieldDetail'), 
         __metadata('design:type', core_1.QueryList)
@@ -93,10 +90,9 @@ var DocumentDefinitionComponent = (function () {
     DocumentDefinitionComponent = __decorate([
         core_1.Component({
             selector: 'document-definition',
-            inputs: ['docDef'],
-            template: "\n\t  \t<div class='docDef' *ngIf=\"docDef\">\n\t  \t\t<div class=\"card-pf\">\n\t  \t\t\t<div class=\"card-pf-heading\">\n    \t\t\t\t<h2 class=\"card-pf-title\">{{docDef.name}}</h2>\n    \t\t\t</div>\n    \t\t\t<div class=\"card-pf-body\">\n                    <document-field-detail #fieldDetail *ngFor=\"let f of docDef.fields\" \n                        [field]=\"f\" [fieldClicked]=\"fieldClicked\"></document-field-detail>\n\t\t\t    </div>\n\t\t    </div>\n\t    </div>\n    "
+            template: "\n\t  \t<div #documentDefinitionElement class='docDef' *ngIf=\"docDef\">\n\t  \t\t<div class=\"card-pf\">\n\t  \t\t\t<div class=\"card-pf-heading\">\n    \t\t\t\t<h2 class=\"card-pf-title\">{{docDef.name}}</h2>\n                    <a class=\"searchBoxIcon\" (click)=\"toggleSearch()\">\n                        <i class=\"fa fa-search\" [attr.style]=\"searchIconStyle\"></i>\n                    </a>\n    \t\t\t</div>\n    \t\t\t<div class=\"card-pf-body\">\n                    <div *ngIf=\"searchMode\">\n                        <input type=\"text\" class=\"searchBox\" #searchFilterBox \n                            id=\"search-filter-box\" (keyup)=\"search(searchFilterBox.value)\" placeholder=\"Search\"\n                            [(ngModel)]=\"searchFilter\" />\n                        <a class=\"searchBoxCloseIcon\" (click)=\"clearSearch()\"><i class=\"fa fa-close\"></i></a>\n                    </div>\n                    <document-field-detail #fieldDetail *ngFor=\"let f of docDef.fields\" \n                        [field]=\"f\" [docDef]=\"docDef\" [cfg]=\"cfg\" \n                        [lineMachine]=\"lineMachine\"></document-field-detail>\n\t\t\t    </div>\n                <div class=\"card-pf-heading fieldsCount\">{{getFieldCount()}} fields</div>\n\t\t    </div>\n\t    </div>\n    "
         }), 
-        __metadata('design:paramtypes', [])
+        __metadata('design:paramtypes', [platform_browser_1.DomSanitizer])
     ], DocumentDefinitionComponent);
     return DocumentDefinitionComponent;
 }());

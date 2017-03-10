@@ -1,0 +1,36 @@
+{
+	"AtlasMapping":{
+		"jsonType":"com.mediadriver.atlas.v2.AtlasMapping",
+		"fieldMappings":{
+			"fieldMapping":[{
+				"jsonType":"com.mediadriver.atlas.v2.SeparateFieldMapping",
+				"inputField":{
+					"jsonType":"com.mediadriver.atlas.v2.MappedField",
+					"field":{
+						"jsonType":"com.mediadriver.atlas.java.v2.JavaField",
+						"name":"foo","value":"bar"
+					}
+					,"fieldActions":[]
+				},
+				"outputFields":{
+					"mappedField":[{
+						"jsonType":"com.mediadriver.atlas.v2.MappedField",
+						"field":{
+							"jsonType":"com.mediadriver.atlas.java.v2.JavaField",
+							"name":"woot","value":"blerg"
+						},
+						"fieldActions":[]
+					},
+						{
+						"jsonType":"com.mediadriver.atlas.v2.MappedField",
+						"field":{
+							"jsonType":"com.mediadriver.atlas.java.v2.JavaField",
+							"name":"meow",
+							"value":"ruff"
+						},
+						"fieldActions":[]}
+					]}
+				}]
+		},
+	"name":"junit"}
+}

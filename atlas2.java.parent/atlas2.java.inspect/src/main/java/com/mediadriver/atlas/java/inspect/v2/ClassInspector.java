@@ -3,6 +3,7 @@ package com.mediadriver.atlas.java.inspect.v2;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,16 +12,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.mediadriver.atlas.java.v2.JavaClass;
 import com.mediadriver.atlas.java.v2.JavaEnumField;
 import com.mediadriver.atlas.java.v2.JavaField;
 import com.mediadriver.atlas.java.v2.AtlasJavaModelFactory;
 import com.mediadriver.atlas.v2.AtlasModelFactory;
+import com.mediadriver.atlas.v2.FieldStatus;
 import com.mediadriver.atlas.v2.FieldType;
 
 public class ClassInspector implements Serializable {
 	
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 6634950157813704038L;
+	private static final Logger logger = LoggerFactory.getLogger(ClassInspector.class);
+	public static final int MAX_REENTRY_LIMIT = 1;
+	public static final int MAX_ARRAY_DIM_LIMIT = 256; // JVM specification limit
+
 	public static final Set<String> primitiveClasses = new HashSet<String>(Arrays.asList("byte", "short", "int", "long", "float", "double", "boolean", "char"));
 	public static final Set<String> boxedPrimitiveClasses = new HashSet<String>(Arrays.asList("java.lang.Byte", "java.lang.Short", "java.lang.Integer", "java.lang.Long", "java.lang.Float", "java.lang.Double", "java.lang.Boolean", "java.lang.Character", "java.lang.String"));
 	
@@ -74,93 +83,335 @@ public class ClassInspector implements Serializable {
 		return packageNames;
 	}		
 	
-	public static Map<String,JavaClass> inspectClasses(List<String> classNames) throws ClassNotFoundException, InspectionException {
+	public static Map<String,JavaClass> inspectClasses(List<String> classNames) {
 		Map<String,JavaClass> classes = new HashMap<>();
 		for (String c : classNames) {
-			JavaClass d = inspectClass(Class.forName(c));
+			JavaClass d = inspectClass(c);
 			classes.put(d.getFullyQualifiedName(), d);
 		}
 		return classes;
 	}
 
-	public static JavaClass inspectClass(String className) throws ClassNotFoundException, InspectionException {
-		return inspectClass(Class.forName(className));
+	public static JavaClass inspectClass(String className) {
+		JavaClass d = null;
+		Class<?> clazz = null;
+		try {
+			clazz = Class.forName(className);
+			d = inspectClass(clazz);
+		} catch (ClassNotFoundException cnfe) {
+			d = AtlasJavaModelFactory.createJavaClass();
+			d.setFullyQualifiedName(className);
+			d.setStatus(FieldStatus.NOT_FOUND);
+		}
+		return d;
 	}
 	
-	public static JavaClass inspectClass(Class<?> clz) throws InspectionException {
-		JavaClass d = AtlasJavaModelFactory.createJavaClass();
-		d.setClassName(clz.getSimpleName());
-		d.setPackageName(clz.getPackage().getName());
-		d.setFullyQualifiedName(clz.getCanonicalName());	
-		Object[] enumConstants = clz.getEnumConstants();
-		if (enumConstants != null) {
-			d.setEnumeration(true);
-			for (Object o : enumConstants) {
-				if (o instanceof Enum) {
-					Enum<?> in = (Enum<?>) o;
-					JavaEnumField out = new JavaEnumField();
-					out.setName(in.name());
-					out.setOrdinal(in.ordinal());
-					d.getJavaEnumFields().getJavaEnumField().add(out);
-				} else {
-					throw new InspectionException("Unsupported enum constant class: " + o.getClass().getCanonicalName());
-				}
-				System.out.println(o);
-			}
+	public static JavaClass inspectClass(Class<?> clazz) {
+		JavaClass javaClass = AtlasJavaModelFactory.createJavaClass();
+		inspectClass(clazz, javaClass, new HashSet<String>());
+		return javaClass;
+	}
+		
+	protected static void inspectClass(Class<?> clazz, JavaClass javaClass, Set<String> cachedClasses) {
+
+		Class<?> clz = clazz;
+		if(clazz.isArray()) {
+			javaClass.setArray(clazz.isArray());
+			javaClass.setArrayDimensions(detectArrayDimensions(clazz));
+			clz = detectArrayClass(clazz);
 		} else {
-			d.setEnumeration(false);
+			if(javaClass.isArray() == null) {
+				javaClass.setArray(clazz.isArray());
+			}
+			clz = clazz;
 		}
 		
+		javaClass.setClassName(clz.getSimpleName());
+		javaClass.setPackageName((clz.getPackage() != null ? clz.getPackage().getName() : null));
+		javaClass.setFullyQualifiedName(clz.getCanonicalName());	
+		javaClass.setAnnotation(clz.isAnnotation());
+		javaClass.setAnnonymous(clz.isAnonymousClass());
+		javaClass.setEnumeration(clz.isEnum());
+		javaClass.setInterface(clz.isInterface());
+		javaClass.setLocalClass(clz.isLocalClass());
+		javaClass.setMemberClass(clz.isMemberClass());
+		javaClass.setPrimitive(clz.isPrimitive());
+		javaClass.setSynthetic(clz.isSynthetic());
+			
 		Field[] fields = clz.getDeclaredFields();
 		if (fields != null) {
 			for (Field f : fields) {
 				if (Enum.class.isAssignableFrom(f.getType())) {
 					continue;
 				}
-				JavaField s = inspectField(f);
-				d.getFields().getField().add(s);
+				JavaField s = inspectField(f, cachedClasses);
+				javaClass.getJavaFields().getJavaField().add(s);
 			}
 		}
 		
-		//TODO: annotations, generics, interfaces, enums, class modifiers (public, synchronized, etc), 
+		Object[] enumConstants = clz.getEnumConstants();
+		if (enumConstants != null) {
+			javaClass.setEnumeration(true);
+			for (Object o : enumConstants) {
+				JavaEnumField out = new JavaEnumField();
+				if (o instanceof Enum) {
+					Enum<?> in = (Enum<?>) o;
+					out.setName(in.name());
+					out.setOrdinal(in.ordinal());
+					javaClass.getJavaEnumFields().getJavaEnumField().add(out);
+					out.setStatus(FieldStatus.SUPPORTED);
+				} else {
+					out.setClassName(o.getClass().getCanonicalName());
+					out.setStatus(FieldStatus.ERROR);
+				}
+			}
+		} else {
+			javaClass.setEnumeration(false);
+		}
+		
+		Method[] methods = clz.getDeclaredMethods();
+		if (methods != null) {
+			for (Method m : methods) {
+				JavaField s = new JavaField();
+				s.setName(m.getName());
+				s.setSynthetic(m.isSynthetic());
+				
+				if(m.isVarArgs() || m.isBridge() || m.isSynthetic() || m.isDefault()) {
+					s.setStatus(FieldStatus.UNSUPPORTED);
+					logger.warn("VarArg, Bridge, Synthetic or Default method " + m.getName() + " detected");
+					continue;
+				} else {
+					s.setSynthetic(m.isSynthetic());
+				}
+							
+				if(m.getName().startsWith("get") || m.getName().startsWith("is")) {
+					s = inspectGetMethod(m, s, cachedClasses);
+				}
+
+				if(m.getName().startsWith("set")) {
+					s = inspectSetMethod(m, s, cachedClasses);
+				}
+				
+				boolean found = false;
+				for(int i=0; i < javaClass.getJavaFields().getJavaField().size(); i++) {
+					JavaField exists = (JavaField)javaClass.getJavaFields().getJavaField().get(i);
+					if(s.getName().equals(exists.getName())) {
+						found = true;
+						
+						// Merge get/set method info for interfaces that don't have fields
+						if(exists.getGetMethod() == null && s.getGetMethod() != null) {
+							exists.setGetMethod(s.getGetMethod());
+						}
+						if(exists.getSetMethod() == null && s.getSetMethod() != null) {
+							exists.setSetMethod(s.getSetMethod());
+						}
+					}
+				}
+			
+				if(found) {
+					if(logger.isDebugEnabled()) {
+						logger.debug("Field already defined for method: " + m.getName() + " class: " + clz.getName());
+					}
+				} else if(s.getGetMethod() != null || s.getSetMethod() != null) {
+						javaClass.getJavaFields().getJavaField().add(s);
+				} else {
+					if(logger.isDebugEnabled()) {
+						logger.debug("Ignoring non-field method: " + m.getName() + " class: " + clz.getName());
+					}
+				}
+		
+			}
+		}
+		
+		//TODO: annotations, generics, enums, class modifiers (public, synchronized, etc), 
 		//more of these here: https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html#isPrimitive--
 		//TODO: exceptions
 		//TODO: lists
-		return d;
+		//return javaClass;
 	}
 	
-	public static JavaField inspectField(Field f) {
-		JavaField s = new JavaField();
-		s.setName(f.getName());
-		s.setArray(f.getType().isArray());
+	protected static JavaField inspectGetMethod(Method m, JavaField s, Set<String> cachedClasses) {
 		
-		if(s.isArray()) {
-			if(isFieldPrimitive(f.getType().getComponentType().getCanonicalName())) {
-				s.setPrimitive(true);
-				s.setType(AtlasModelFactory.fieldTypeForPrimitiveClassName(f.getType().getComponentType().getCanonicalName()));
-			} else if(isFieldBoxedPrimitive(f.getType().getComponentType().getCanonicalName())) {
-				s.setPrimitive(false);
-				s.setType(AtlasModelFactory.fieldTypeForPrimitiveClassName(f.getType().getComponentType().getCanonicalName()));
-			} else {
-					s.setPrimitive(false);
-					s.setType(FieldType.COMPLEX);
-				}
-			s.setClassName(f.getType().getComponentType().getCanonicalName());
-		} else {
-			if(isFieldPrimitive(f.getType().getCanonicalName())) {
-				s.setPrimitive(true);
-				s.setType(AtlasModelFactory.fieldTypeForPrimitiveClassName(f.getType().getCanonicalName()));
-			} else if(isFieldBoxedPrimitive(f.getType().getCanonicalName())) {
-				s.setPrimitive(true);
-				s.setType(AtlasModelFactory.fieldTypeForPrimitiveClassName(f.getType().getCanonicalName()));
-			} else {
-				s.setPrimitive(false);
-				s.setType(FieldType.COMPLEX);
-			}
-			s.setClassName(f.getType().getCanonicalName());
+		s.setName(StringUtil.removeGetterAndLowercaseFirstLetter(m.getName()));
+
+		if(m.getParameterCount() != 0) {
+			s.setStatus(FieldStatus.UNSUPPORTED);;
+			return s;
 		}
-					
+		
+		if(m.getReturnType().equals(Void.TYPE)) {
+			s.setStatus(FieldStatus.UNSUPPORTED);
+			return s;
+		}
+		
+		Class<?> returnType = m.getReturnType();
+		if(returnType.isArray()) {
+			s.setArray(true);
+			s.setArrayDimensions(detectArrayDimensions(returnType));
+			returnType = detectArrayClass(returnType);
+		} else {
+			s.setArray(false);
+		}
+		
+		s.setClassName(returnType.getCanonicalName());
+		s.setGetMethod(m.getName());
+		if(isFieldPrimitive(returnType.getCanonicalName())) {	
+			s.setPrimitive(true);
+			s.setType(AtlasModelFactory.fieldTypeFromClassName(returnType.getCanonicalName()));
+			s.setStatus(FieldStatus.SUPPORTED);
+		} else if(isFieldBoxedPrimitive(returnType.getCanonicalName())) {
+			s.setPrimitive(true);
+			s.setType(AtlasModelFactory.fieldTypeFromClassName(returnType.getCanonicalName()));
+			s.setStatus(FieldStatus.SUPPORTED);
+		} else {
+			s.setPrimitive(false);
+			s.setType(FieldType.COMPLEX);
+			
+			Class<?> complexClazz = null;
+			JavaClass tmpField = convertJavaFieldToJavaClass(s);
+			s = tmpField;
+			
+			if(returnType.getCanonicalName() == null) {
+				s.setStatus(FieldStatus.UNSUPPORTED);
+			} else if(!cachedClasses.contains(returnType.getCanonicalName())) {
+				try {
+					complexClazz = Class.forName(returnType.getCanonicalName());
+					cachedClasses.add(returnType.getCanonicalName());
+					inspectClass(complexClazz, tmpField, cachedClasses);
+					if(tmpField.getStatus() == null) {
+						s.setStatus(FieldStatus.SUPPORTED);
+					}
+				} catch (ClassNotFoundException cnfe) {
+					s.setStatus(FieldStatus.NOT_FOUND);
+				}
+			} else {
+				s.setStatus(FieldStatus.CACHED);
+			}
+		}
+		
+		return s;
+	}
+	
+	protected static JavaField inspectSetMethod(Method m, JavaField s, Set<String> cachedClasses) {
+
+		s.setName(StringUtil.removeSetterAndLowercaseFirstLetter(m.getName()));
+
+		if(m.getParameterCount() != 1) {
+			s.setStatus(FieldStatus.UNSUPPORTED);;
+			return s;
+		}
+		
+		if(!m.getReturnType().equals(Void.TYPE)) {
+			s.setStatus(FieldStatus.UNSUPPORTED);
+			return s;
+		}
+		
+		Class<?>[] params = m.getParameterTypes();
+		if(params == null || params.length != 1) {
+			s.setStatus(FieldStatus.UNSUPPORTED);
+			return s;
+		}
+		
+		Class<?> paramType = params[0];				
+		if(paramType.isArray()) {
+			s.setArray(true);
+			s.setArrayDimensions(detectArrayDimensions(paramType));
+			paramType = detectArrayClass(paramType);
+		} else {
+			s.setArray(false);
+		}
+		
+		s.setClassName(paramType.getCanonicalName());
+		s.setSetMethod(m.getName());
+		if(isFieldPrimitive(paramType.getCanonicalName())) {	
+			s.setPrimitive(true);
+			s.setType(AtlasModelFactory.fieldTypeFromClassName(paramType.getCanonicalName()));
+			s.setStatus(FieldStatus.SUPPORTED);
+		} else if(isFieldBoxedPrimitive(paramType.getCanonicalName())) {
+			s.setPrimitive(true);
+			s.setType(AtlasModelFactory.fieldTypeFromClassName(paramType.getCanonicalName()));
+			s.setStatus(FieldStatus.SUPPORTED);
+		} else {
+			s.setPrimitive(false);
+			s.setType(FieldType.COMPLEX);
+
+			Class<?> complexClazz = null;
+			JavaClass tmpField = convertJavaFieldToJavaClass(s);
+			s = tmpField;
+			
+			if(paramType.getCanonicalName() == null) {
+				s.setStatus(FieldStatus.UNSUPPORTED);
+			} else if(!cachedClasses.contains(paramType.getCanonicalName())) {
+				try {
+					complexClazz = Class.forName(paramType.getCanonicalName());
+					cachedClasses.add(paramType.getCanonicalName());
+					inspectClass(complexClazz, tmpField, cachedClasses);
+					if(tmpField.getStatus() == null) {
+						s.setStatus(FieldStatus.SUPPORTED);
+					}
+				} catch (ClassNotFoundException cnfe) {
+					s.setStatus(FieldStatus.NOT_FOUND);
+				}
+			} else {
+				s.setStatus(FieldStatus.CACHED);
+			}
+		}
+		
+		return s;
+	}
+	
+	protected static JavaField inspectField(Field f, Set<String> cachedClasses) {
+
+		JavaField s = new JavaField();
+		Class<?> clazz = f.getType();
+		
+		if(clazz.isArray()) {
+			s.setArray(true);
+			s.setArrayDimensions(detectArrayDimensions(clazz));
+			clazz = detectArrayClass(clazz);
+		} else {
+			s.setArray(false);
+		}
+		
+		s.setName(f.getName());
+		
+		if(isFieldPrimitive(clazz.getCanonicalName())) {
+			s.setPrimitive(true);
+			s.setType(AtlasModelFactory.fieldTypeFromClassName(clazz.getCanonicalName()));
+			s.setStatus(FieldStatus.SUPPORTED);
+		} else if(isFieldBoxedPrimitive(clazz.getCanonicalName())) {
+			s.setPrimitive(true);
+			s.setType(AtlasModelFactory.fieldTypeFromClassName(clazz.getCanonicalName()));
+			s.setStatus(FieldStatus.SUPPORTED);
+		} else {
+			s.setPrimitive(false);
+			s.setType(FieldType.COMPLEX);
+			
+			Class<?> complexClazz = null;
+			JavaClass tmpField = convertJavaFieldToJavaClass(s);
+			s = tmpField;
+			
+			if(clazz.getCanonicalName() == null) {
+				s.setStatus(FieldStatus.UNSUPPORTED);
+			} else if(!cachedClasses.contains(clazz.getCanonicalName())) {
+				try {
+					complexClazz = Class.forName(clazz.getCanonicalName());
+					cachedClasses.add(clazz.getCanonicalName());
+					inspectClass(complexClazz, tmpField, cachedClasses);
+					if(tmpField.getStatus() == null) {
+						s.setStatus(FieldStatus.SUPPORTED);
+					}
+				} catch (ClassNotFoundException cnfe) {
+					s.setStatus(FieldStatus.NOT_FOUND);
+				}
+			} else {
+				s.setStatus(FieldStatus.CACHED);
+			}
+		}	
+	
+		s.setClassName(clazz.getCanonicalName());
 		s.setSynthetic(f.isSynthetic());
+		
 		Annotation[] annotations = f.getAnnotations();
 		if (annotations != null) {
 			for (Annotation a : annotations) {
@@ -168,35 +419,100 @@ public class ClassInspector implements Serializable {
 			}
 		}
 		
-		//detect getters and setters
 		try {
 			String getterName = "get" + StringUtil.capitalizeFirstLetter(f.getName());			
 			f.getDeclaringClass().getMethod(getterName);
 			s.setGetMethod(getterName);
-		} catch (NoSuchMethodException e) { }
+		} catch (NoSuchMethodException e) { 
+			if(logger.isDebugEnabled()) {
+				logger.debug("No 'get' method for field named: " + f.getName() + " in class: " + f.getDeclaringClass().getName());
+			}
+		}
 		if (s.getGetMethod() == null && ("boolean".equals(s.getClassName()) || "java.lang.Boolean".equals(s.getClassName()))) {
 			try {
 				String getterName = "is" + StringUtil.capitalizeFirstLetter(f.getName());			
 				f.getDeclaringClass().getMethod(getterName);
 				s.setGetMethod(getterName);
-			} catch (NoSuchMethodException e) { }
+			} catch (NoSuchMethodException e) {
+				if(logger.isDebugEnabled()) {
+					logger.debug("No 'is' method for field named: " + f.getName() + " in class: " + f.getDeclaringClass().getName());
+				}
+			}
 		}		
 		try {
 			String setterName = "set" + StringUtil.capitalizeFirstLetter(f.getName());
-			f.getDeclaringClass().getMethod(setterName, f.getType());
+			f.getDeclaringClass().getMethod(setterName, clazz);
 			s.setSetMethod(setterName);
-		} catch (NoSuchMethodException e) { }
+		} catch (NoSuchMethodException e) {
+			if(logger.isDebugEnabled()) {
+				logger.debug("No 'set' method for field named: " + f.getName() + " in class: " + f.getDeclaringClass().getName());
+			}
+		}
 		return s;
 	}
 	
-	// TODO: Replace this with .getComponent() mode for dealing w/ arrays in reflection
-	public static boolean isFieldPrimitive(String fieldType) {
-		fieldType = (fieldType != null && fieldType.endsWith("[]")) ? fieldType.substring(0, fieldType.indexOf('[')) : fieldType;
+	protected static boolean isFieldPrimitive(String fieldType) {
 		return primitiveClasses.contains(fieldType); 
 	}
 	
-	public static boolean isFieldBoxedPrimitive(String fieldType) {
-		fieldType = (fieldType != null && fieldType.endsWith("[]")) ? fieldType.substring(0, fieldType.indexOf('[')) : fieldType;
+	protected static boolean isFieldBoxedPrimitive(String fieldType) {
 		return boxedPrimitiveClasses.contains(fieldType); 
+	}
+	
+	protected static Integer detectArrayDimensions(Class<?> clazz) {
+		Integer arrayDim = new Integer(0);
+		if(clazz == null) {
+			return null;
+		}	
+		
+		if(!clazz.isArray()) {
+			return arrayDim;
+		} else { 
+			arrayDim++;
+		}
+		
+		Class<?> tmpClazz = clazz.getComponentType();
+		while(tmpClazz != null && tmpClazz.isArray() && arrayDim < MAX_ARRAY_DIM_LIMIT) {
+			arrayDim++;
+			tmpClazz = tmpClazz.getComponentType();
+		}  
+		return arrayDim;
+	}
+	
+	protected static Class<?> detectArrayClass(Class<?> clazz) {
+		Integer arrayDim = new Integer(0);
+		if(clazz == null) {
+			return null;
+		}	
+		
+		if(!clazz.isArray()) {
+			return clazz;
+		} else { 
+			arrayDim++;
+		}
+		
+		Class<?> tmpClazz = clazz.getComponentType();
+		while(tmpClazz != null && tmpClazz.isArray() && arrayDim < MAX_ARRAY_DIM_LIMIT) {
+			arrayDim++;
+			tmpClazz = tmpClazz.getComponentType();
+		}  
+		return tmpClazz;
+	}
+	
+	protected static JavaClass convertJavaFieldToJavaClass(JavaField javaField) {
+		JavaClass javaClass = AtlasJavaModelFactory.createJavaClass();
+		javaClass.setArray(javaField.isArray());
+		javaClass.setArrayDimensions(javaField.getArrayDimensions());
+		javaClass.setCollection(javaField.isCollection());
+		javaClass.setPrimitive(javaField.isPrimitive());
+		javaClass.setSynthetic(javaField.isSynthetic());
+		javaClass.setClassName(javaField.getClassName());
+		javaClass.setGetMethod(javaField.getGetMethod());
+		javaClass.setName(javaField.getName());
+		javaClass.setSetMethod(javaField.getSetMethod());
+		javaClass.setStatus(javaField.getStatus());
+		javaClass.setType(javaField.getType());
+		javaClass.setValue(javaField.getValue());
+		return javaClass;
 	}
 }

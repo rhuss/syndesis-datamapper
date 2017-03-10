@@ -9,67 +9,69 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var core_1 = require('@angular/core');
-var field_model_1 = require('../models/field.model');
-var mapping_model_1 = require('../models/mapping.model');
-var mapping_management_service_1 = require('../services/mapping.management.service');
+var platform_browser_1 = require('@angular/platform-browser');
+var config_model_1 = require('../models/config.model');
+var modal_window_component_1 = require('./modal.window.component');
+var transition_selection_component_1 = require('./transition.selection.component');
 var MappingDetailComponent = (function () {
-    function MappingDetailComponent() {
+    function MappingDetailComponent(sanitizer) {
+        this.sanitizer = sanitizer;
     }
-    MappingDetailComponent.prototype.ngAfterViewChecked = function () {
-        var mappingFieldsArray = this.mappingFields.toArray();
-        for (var _i = 0, mappingFieldsArray_1 = mappingFieldsArray; _i < mappingFieldsArray_1.length; _i++) {
-            var mappingField = mappingFieldsArray_1[_i];
-            mappingField.fieldComponent.parentComponent = this;
-            mappingField.fieldComponent.removeFieldCallback = this.removeField;
-        }
+    MappingDetailComponent.prototype.getMappingFields = function (isInput) {
+        var docDef = isInput ? this.cfg.inputDoc : this.cfg.outputDoc;
+        var fieldPaths = isInput ? this.cfg.mappings.activeMapping.inputFieldPaths
+            : this.cfg.mappings.activeMapping.outputFieldPaths;
+        return docDef.getFields(fieldPaths);
     };
     MappingDetailComponent.prototype.deselectMapping = function (event) {
-        //TODO: prompt for save if not saved.
-        this.mapping = null;
-        this.selectionChanged(this);
+        this.cfg.mappingService.deselectMapping();
+    };
+    MappingDetailComponent.prototype.toggleDataTypeVisibility = function (event) {
+        this.cfg.showMappingDataType = !this.cfg.showMappingDataType;
     };
     MappingDetailComponent.prototype.saveMapping = function (event) {
-        this.mapperService.saveMapping(this.mapping);
-        this.mapping = null;
-        this.selectionChanged(this);
+        this.cfg.mappingService.saveMapping(this.cfg.mappings.activeMapping);
     };
     MappingDetailComponent.prototype.removeMapping = function (event) {
-        this.mapperService.removeMapping(this.mapping);
-        this.mapping = null;
-        this.selectionChanged(this);
-    };
-    MappingDetailComponent.prototype.removeField = function (fdc) {
-        var self = fdc.parentComponent;
-        var f = fdc.field;
-        console.log(fdc);
-        self.mapping.removeField(fdc.field.name, fdc.isInput);
-        self.selectionChanged(self);
+        this.cfg.mappingService.removeMapping(this.cfg.mappings.activeMapping);
     };
     MappingDetailComponent.prototype.addField = function (event, isInput) {
-        var f = new field_model_1.Field("example add", "type");
-        if (isInput) {
-            this.mapping.inputFields.push(f);
-        }
-        else {
-            this.mapping.outputFields.push(f);
+        this.cfg.mappingService.addMappedField(null, isInput);
+    };
+    MappingDetailComponent.prototype.editAction = function (event) {
+        this.modalWindow.reset();
+        this.modalWindow.parentComponent = this;
+        this.modalWindow.headerText = "Configure Action";
+        var m = this.cfg.mappings.activeMapping;
+        this.modalWindow.nestedComponentInitializedCallback = function (mw) {
+            var c = mw.nestedComponent;
+            c.model.mode = m.transition.mode;
+            c.model.delimiter = m.transition.delimiter;
+        };
+        this.modalWindow.nestedComponentType = transition_selection_component_1.TransitionSelectionComponent;
+        this.modalWindow.okButtonHandler = function (mw) {
+            var c = mw.nestedComponent;
+            m.transition.mode = c.model.mode;
+            m.transition.delimiter = c.model.delimiter;
+            m.updateSeparatorIndexes();
+        };
+        this.modalWindow.show();
+    };
+    MappingDetailComponent.prototype.updateHeight = function () {
+        if (this.cfg.inputDoc && this.cfg.outputDoc) {
+            var maxFieldCount = Math.max(this.cfg.inputDoc.fields.length, this.cfg.outputDoc.fields.length);
+            var heightCSS = ((maxFieldCount * 40) + 120).toString() + "px";
+            this.detailStyle = this.sanitizer.bypassSecurityTrustStyle("height:" + heightCSS + ";");
         }
     };
     __decorate([
         core_1.Input(), 
-        __metadata('design:type', mapping_model_1.MappingModel)
-    ], MappingDetailComponent.prototype, "mapping", void 0);
+        __metadata('design:type', config_model_1.ConfigModel)
+    ], MappingDetailComponent.prototype, "cfg", void 0);
     __decorate([
         core_1.Input(), 
-        __metadata('design:type', Function)
-    ], MappingDetailComponent.prototype, "selectionChanged", void 0);
-    __decorate([
-        core_1.Input(), 
-        __metadata('design:type', core_1.Component)
-    ], MappingDetailComponent.prototype, "parentComponent", void 0);
-    __decorate([
-        core_1.Input(), 
-        __metadata('design:type', mapping_management_service_1.MappingManagementService)
-    ], MappingDetailComponent.prototype, "mapperService", void 0);
+        __metadata('design:type', modal_window_component_1.ModalWindowComponent)
+    ], MappingDetailComponent.prototype, "modalWindow", void 0);
     __decorate([
         core_1.ViewChildren('mappingField'), 
         __metadata('design:type', core_1.QueryList)
@@ -77,10 +79,9 @@ var MappingDetailComponent = (function () {
     MappingDetailComponent = __decorate([
         core_1.Component({
             selector: 'mapping-detail',
-            inputs: ['mapping'],
-            template: "\n\t  \t<div class='fieldMappingDetail' *ngIf=\"mapping\">\n\t  \t\t<h2 class=\"card-pf-title\">Data Mapping</h2>\n\t  \t\t<h4 style=\"font-size:11px; font-weight:bold;\">Edit your mapping here to confirm it's correct.</h4>\n\t  \t\t<h3 style=\"font-size:12px; font-weight:bold;\">Source</h3>\n\t  \t\t<mapping-field #mappingField *ngFor=\"let field of mapping.inputFields\" [field]=\"field\" [isInput]=\"true\"></mapping-field>\n\t  \t\t<!-- <a (click)=\"addField($event, true)\"><i class=\"fa fa-plus\" aria-hidden=\"true\"></i> Add Field</a> -->\n\t  \t\t<hr/>\n\t  \t\t<div><label class=\"sectionHeader\">Action: </label><label>&nbsp;[Action Selector Goes Here]</label>\n\t  \t\t<hr/>\n\t  \t\t<h3 style=\"font-size:12px; font-weight:bold;\">Target</h3>\n\t  \t\t<mapping-field #mappingField *ngFor=\"let field of mapping.outputFields\" [field]=\"field\" [isInput]=\"false\"></mapping-field>\n\t  \t\t<!-- <a (click)=\"addField($event, false)\"><i class=\"fa fa-plus\" aria-hidden=\"true\"></i> Add Field</a> -->\n\t  \t\t<hr/>\t  \t\t\n\t  \t\t<a class='button' (click)=\"removeMapping($event)\"><i class=\"fa fa-trash\" aria-hidden=\"true\"></i> Remove</a>\t  \t\t\n\t  \t\t<a class='button' (click)=\"deselectMapping($event)\"><i class=\"fa fa-close\" aria-hidden=\"true\"></i> Deselect</a>\n\t  \t\t<a class='button' (click)=\"saveMapping($event)\"><i class=\"fa fa-save\" aria-hidden=\"true\"></i> Save</a>\n\t    </div>\n    "
+            template: "\n\t  \t<div class='fieldMappingDetail'  [attr.style]=\"detailStyle\" \n\t  \t\t*ngIf=\"cfg.mappings.activeMapping && cfg.showMappingDetailTray\">\n\t  \t\t<div class=\"card-pf-title\" style=\"margin:0px;\">\n\t  \t\t\t<div style=\"float:left;\"><h2 style=\"display:inline;\">Data Transformation</h2></div>\n\t  \t\t\t<div style=\"float:right; text-align:right; padding-right:2px;\">\n\t  \t\t\t<a (click)=\"removeMapping($event)\" style=\"font-size:14px;\" tooltip=\"Remove current mapping\">\n\t  \t\t\t\t<i class=\"fa fa-trash\" aria-hidden=\"true\" style=\"font-size:14px; margin-left:5px;\"></i> \n\t  \t\t\t</a>\n\t  \t\t\t<a (click)=\"toggleDataTypeVisibility($event)\" tooltip=\"Show field data types\" style=\"margin-left:5px;\">\n\t  \t\t\t\t<i style=\"font-size:14px;\" class=\"fa fa-cog\" aria-hidden=\"true\"></i>\n\t  \t\t\t</a>\n\t  \t\t\t<a (click)=\"deselectMapping($event)\" tooltip=\"Deselect current mapping\" style=\"margin-left:5px;\">\n\t  \t\t\t\t<i style=\"font-size:16px;\" class=\"fa fa-close\" aria-hidden=\"true\"></i>\n\t  \t\t\t</a>\t  \t\n\t  \t\t\t</div>\n\t  \t\t\t<div style=\"clear:both; height:0px;\"></div>\n\t  \t\t</div>\n\t  \t\t<div class=\"mappingFieldContainer\">\n\t\t  \t\t<h3 style=\"font-size:12px; font-weight:bold;\">Source</h3>\n\t\t  \t\t<div *ngFor=\"let field of getMappingFields(true)\" style=\"padding-bottom:10px;\">\n\t\t  \t\t\t<mapping-field-detail #mappingField [selectedFieldPath]=\"field.path\" [cfg]=\"cfg\"\n\t\t  \t\t\t\t[docDef]=\"cfg.inputDoc\"></mapping-field-detail>\n\t\t  \t\t\t<mapping-field-action [field]=\"field\" [mapping]=\"cfg.mappings.activeMapping\" \n\t\t  \t\t\t\t[isInput]=\"true\"></mapping-field-action>\n\t\t  \t\t</div>\n\t\t\t\t<!-- <a (click)=\"addField($event, true)\"><i class=\"fa fa-plus\" \n\t\t\t\t\taria-hidden=\"true\" style=\"font-size:10px\"></i> Add Field</a> -->\n\t\t\t</div>\n\t  \t\t<div class=\"mappingFieldContainer\" >\n\t  \t\t\t<label class=\"sectionHeader\" style=\"float:left; margin-bottom:0px;\">Action:&nbsp;</label>\n\t  \t\t\t<label style=\"float:left; margin-bottom:0px;\">\n\t  \t\t\t\t{{cfg.mappings.activeMapping.transition.getPrettyName()}}\n\t  \t\t\t</label>\n\t  \t\t\t<a style='display:inline; float:right; margin-right:1px' (click)=\"editAction($event)\">\n\t  \t\t\t\t<i class=\"fa fa-edit\" aria-hidden=\"true\"></i>\n\t  \t\t\t</a>\n\t  \t\t\t<div style=\"clear:both; height:0px;\">&nbsp;</div>\n\t  \t\t</div>\n\t  \t\t<div class=\"mappingFieldContainer\">\n\t\t  \t\t<h3 style=\"font-size:12px; font-weight:bold;\">Target</h3>\n\t\t  \t\t<div *ngFor=\"let field of getMappingFields(false)\" style=\"padding-bottom:10px;\">\n\t\t  \t\t\t<mapping-field-detail #mappingField [selectedFieldPath]=\"field.path\" [cfg]=\"cfg\"\n\t\t  \t\t\t\t[docDef]=\"cfg.outputDoc\"></mapping-field-detail>\n\t\t  \t\t\t<mapping-field-action [field]=\"field\" [mapping]=\"cfg.mappings.activeMapping\" \n\t\t  \t\t\t\t[isInput]=\"false\"></mapping-field-action>\n\t\t  \t\t</div>\n\t\t\t\t<a (click)=\"addField($event, false)\"><i class=\"fa fa-plus\" \n\t\t\t\t\taria-hidden=\"true\" style=\"font-size:10px\"></i> Add Field</a>\t  \t\t\n\t\t\t</div>\t\t  \t\t\t\t  \t\t\n\t  \t\t<a class='button' (click)=\"saveMapping($event)\"><i class=\"fa fa-save\" aria-hidden=\"true\"></i> Save</a>\n\t    </div>\n    "
         }), 
-        __metadata('design:paramtypes', [])
+        __metadata('design:paramtypes', [platform_browser_1.DomSanitizer])
     ], MappingDetailComponent);
     return MappingDetailComponent;
 }());

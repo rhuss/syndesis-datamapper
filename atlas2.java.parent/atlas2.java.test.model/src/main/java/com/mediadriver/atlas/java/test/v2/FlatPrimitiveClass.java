@@ -1,7 +1,7 @@
 package com.mediadriver.atlas.java.test.v2;
 
 public class FlatPrimitiveClass {
-	
+
 	protected int intField;
 	protected short shortField;
 	protected long longField;

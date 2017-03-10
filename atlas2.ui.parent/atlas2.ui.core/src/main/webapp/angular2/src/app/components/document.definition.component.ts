@@ -1,91 +1,109 @@
-import { Component, Input, ViewChildren, ElementRef, QueryList } from '@angular/core';
+import { Component, Input, ViewChildren, ElementRef, QueryList, ViewChild } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl, SafeUrl, SafeStyle} from '@angular/platform-browser';
 
+import { ConfigModel } from '../models/config.model';
 import { Field } from '../models/field.model';
 import { DocumentDefinition } from '../models/document.definition.model';
 
 import { DocumentFieldDetailComponent } from './document.field.detail.component';
+import { LineMachineComponent } from './line.machine.component';
 
 import { MappingManagementService } from '../services/mapping.management.service';
+import { DocumentManagementService } from '../services/document.management.service';
 
 @Component({
 	selector: 'document-definition',
-	inputs: ['docDef'],
 	template: `
-	  	<div class='docDef' *ngIf="docDef">
+	  	<div #documentDefinitionElement class='docDef' *ngIf="docDef">
 	  		<div class="card-pf">
 	  			<div class="card-pf-heading">
     				<h2 class="card-pf-title">{{docDef.name}}</h2>
+                    <a class="searchBoxIcon" (click)="toggleSearch()">
+                        <i class="fa fa-search" [attr.style]="searchIconStyle"></i>
+                    </a>
     			</div>
     			<div class="card-pf-body">
+                    <div *ngIf="searchMode">
+                        <input type="text" class="searchBox" #searchFilterBox 
+                            id="search-filter-box" (keyup)="search(searchFilterBox.value)" placeholder="Search"
+                            [(ngModel)]="searchFilter" />
+                        <a class="searchBoxCloseIcon" (click)="clearSearch()"><i class="fa fa-close"></i></a>
+                    </div>
                     <document-field-detail #fieldDetail *ngFor="let f of docDef.fields" 
-                        [field]="f" [fieldClicked]="fieldClicked"></document-field-detail>
+                        [field]="f" [docDef]="docDef" [cfg]="cfg" 
+                        [lineMachine]="lineMachine"></document-field-detail>
 			    </div>
+                <div class="card-pf-heading fieldsCount">{{getFieldCount()}} fields</div>
 		    </div>
 	    </div>
     `
 })
 
 export class DocumentDefinitionComponent { 
-	@Input() parentComponent: Component;
-	@Input() docDef: DocumentDefinition;
-    @Input() selectionChanged: Function;
-    @Input() mapperService: MappingManagementService;
-    @Input() isInput:boolean = false;
-    
-    selectedFields: Field[] = [];
+	@Input() cfg: ConfigModel;
+    @Input() docDef: DocumentDefinition;    
+    @Input() lineMachine: LineMachineComponent;
 
-    @ViewChildren('fieldDetail') fieldComponents: QueryList<DocumentFieldDetailComponent>;
+    private searchMode: boolean = false;
+    private searchFilter: string = "";
+    public searchIconStyle: SafeStyle;
 
-    ngAfterViewChecked() {
-        var components: DocumentFieldDetailComponent[] = this.fieldComponents.toArray();
-        for (let c of components) {
-            c.parentComponent = this;
+    constructor(private sanitizer: DomSanitizer) {}
+
+    private getFieldCount(): number {
+        if (this.docDef && this.docDef.allFields) {
+            return this.docDef.allFields.length;            
         }
+        return 0;
     }
+    @ViewChild('documentDefinitionElement') documentDefinitionElement:ElementRef;
+    @ViewChildren('fieldDetail') fieldComponents: QueryList<DocumentFieldDetailComponent>;    
 
-    fieldClicked(c: DocumentFieldDetailComponent) { 
-        var self = c.parentComponent as DocumentDefinitionComponent;    
-    	var f: Field = c.field;
-    	
-        /* remove this bit after 1.8.0 demo */
-        self.selectedFields = [];
-        self.selectedFields.push(f);
-        /* end bit to remove */
-
-        /* this is for supporting multiple fields per mapping, will put this back in after 1.8.0 demo
-        var wasSelected: boolean = false;
-    	for (var i = 0; i < self.selectedFields.length; i++) {
-            var selectedField: Field = self.selectedFields[i];
-    		if (selectedField.name == f.name) {
-    			self.selectedFields.splice(i, 1);
-    			wasSelected = true;
-    			break;
-    		}
-    	}
-    	if (wasSelected == false) {			
-			self.selectedFields.push(f);
-    	}
-        */
-        self.updateFromSelections();
-    	self.selectionChanged(self);
-   	}   
-
-    public isSelected(fieldName: string): boolean {
-        for (let selectedField of this.selectedFields) {
-            if (selectedField.name == fieldName) {
-                return true;
+    public getFieldDetailComponent(fieldPath: string): DocumentFieldDetailComponent {
+        for (let c of this.fieldComponents.toArray()) {
+            var returnedComponent: DocumentFieldDetailComponent = c.getFieldDetailComponent(fieldPath);
+            if (returnedComponent != null) {
+                return returnedComponent;
             }
         }
-        return false;
+        return null;
+    }    
+
+    public getElementPosition(): any {
+        var x: number = 0;
+        var y: number = 0;
+        
+        var el: any = this.documentDefinitionElement.nativeElement;
+        while (el != null) {
+            x += el.offsetLeft;
+            y += el.offsetTop;
+            el = el.offsetParent;
+        }
+        return { "x": x, "y":y };
+    }	
+
+    public getFieldDetailComponentPosition(fieldPath: string): any {
+        var c: DocumentFieldDetailComponent = this.getFieldDetailComponent(fieldPath);
+        var fieldElementAbsPosition: any = c.getElementPosition();
+        var myAbsPosition:any = this.getElementPosition();
+        return { "x": (fieldElementAbsPosition.x - myAbsPosition.x), "y": (fieldElementAbsPosition.y - myAbsPosition.y) };
     }
 
-    public updateFromSelections() {
-        var components: DocumentFieldDetailComponent[] = this.fieldComponents.toArray();
-        var fieldsInMappings: string[] = this.mapperService.getMappedFields(this.isInput);
-        for (let c of components) {
-            var isSelected: boolean = this.isSelected(c.field.name);
-            c.updateSelection(isSelected);
-            c.partOfMapping = (fieldsInMappings.indexOf(c.field.name) != -1);
+    private search(searchFilter: string): void {
+        this.cfg.documentService.updateSearch(searchFilter, this.docDef.isInput);
+    }  
+
+    private clearSearch(): void  {
+        this.cfg.documentService.updateSearch(null, this.docDef.isInput);
+        this.searchFilter = "";
+    }
+
+    private toggleSearch(): void  {
+        this.searchMode = !this.searchMode;
+        if (!this.searchMode) {
+            this.clearSearch();
         }
-    }	
+        this.searchIconStyle = !this.searchMode ? null 
+            : this.sanitizer.bypassSecurityTrustStyle("color:#5CBADF;");
+    } 
 }

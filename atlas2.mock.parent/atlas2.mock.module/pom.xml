@@ -1,0 +1,37 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.mediadriver.atlas</groupId>
+		<artifactId>atlas2.mock.parent</artifactId>
+		<version>1.9.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<artifactId>atlas2.mock.module</artifactId>
+	<packaging>bundle</packaging>
+	<name>Atlas :: Mock Module</name>
+
+	<properties>
+		<at.osgi.export.pkg>com.mediadriver.atlas.mock.v2</at.osgi.export.pkg>
+		<at.osgi.import.pkg>com.mediadriver.atlas.v2;version="${at.atlas.version.range}",com.mediadriver.atlas.api.v2;version="${at.atlas.version.range}"</at.osgi.import.pkg>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.mediadriver.atlas</groupId>
+			<artifactId>atlas2.model</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mediadriver.atlas</groupId>
+			<artifactId>atlas2.api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+	
+</project>

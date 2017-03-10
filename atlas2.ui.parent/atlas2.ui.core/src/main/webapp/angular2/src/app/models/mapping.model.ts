@@ -1,18 +1,21 @@
 import { Field } from './field.model';
 
+import { TransitionModel, TransitionMode } from './transition.model';
+
 export class MappingModel {
 	public uuid: string;
-	public inputFields: Field[] = [];
-	public outputFields: Field[] = [];		
+	public inputFieldPaths: string[] = [];
+	public outputFieldPaths: string[] = [];		
 	public saved: boolean = false;
+	public transition: TransitionModel = new TransitionModel();	
+	public fieldSeparatorIndexes: { [key:string]:string; } = {};
 
-	removeField(name:string, isInput: boolean) {
-		var fields: Field[] = (isInput ? this.inputFields : this.outputFields);
-    	for (var i = 0; i < fields.length; i++) {
-    		if (fields[i].name == name) {
-    			fields.splice(i, 1);
-    			break;
-    		}
-    	}
+	public updateSeparatorIndexes(): void {
+		var isSeparateMapping: boolean = (this.transition.mode == TransitionMode.SEPARATE);
+		for (let fieldPath of this.inputFieldPaths.concat(this.outputFieldPaths)) {
+			if (this.fieldSeparatorIndexes[fieldPath] == null) {
+				this.fieldSeparatorIndexes[fieldPath] = "1";
+			}
+		}
 	}
 }

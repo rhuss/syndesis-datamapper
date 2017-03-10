@@ -16,7 +16,7 @@ import { ErrorHandlerService } from '../services/error.handler.service';
 })
 
 export class DataMapperErrorComponent { 
-	public errorService: ErrorHandlerService;
+	@Input() public errorService: ErrorHandlerService;
 
 	private handleClick(event: MouseEvent) {
 		// need to extract this so typescript doesnt throw compiler error

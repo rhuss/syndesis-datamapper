@@ -1,0 +1,53 @@
+{
+	"AtlasMapping": {
+    	"jsonType": "com.mediadriver.atlas.v2.AtlasMapping",
+    	"fieldMappings": {
+    		"fieldMapping": [
+    			{
+					"jsonType": "com.mediadriver.atlas.v2.SeparateFieldMapping",
+					"inputField": {
+						"jsonType": "com.mediadriver.atlas.v2.MappedField",
+						"field": {
+							"jsonType": "com.mediadriver.atlas.v2.MockField",
+							"name": "serialVersionUID",
+							"type": "LONG"
+						}
+					},
+					"outputFields": {
+						"mappedField": [
+							{
+								"jsonType":"com.mediadriver.atlas.v2.MappedField",
+								"field": {
+									"jsonType": "com.mediadriver.atlas.v2.MockField",
+									"name": "Description",
+									"type": "STRING"
+								},
+								"fieldActions":{
+									"fieldAction":[{
+										"jsonType":"com.mediadriver.atlas.v2.MapAction",
+										"index":2
+									}]
+								}
+							},
+							{
+								"jsonType":"com.mediadriver.atlas.v2.MappedField",
+								"field": {
+									"jsonType": "com.mediadriver.atlas.v2.MockField",
+									"name": "Amount",
+									"type": "DOUBLE"
+								},
+								"fieldActions":{
+									"fieldAction":[{
+										"jsonType":"com.mediadriver.atlas.v2.MapAction",
+										"index":2
+									}]
+								}
+							}
+						]						
+					}
+				}
+			]
+		},
+		"name": "UI.50313"
+	}
+}

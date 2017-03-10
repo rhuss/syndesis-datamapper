@@ -25,6 +25,7 @@ public class JsonMarshallerTest extends BaseMarshallerTest {
 		mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, true);
 		mapper.configure(DeserializationFeature.UNWRAP_ROOT_VALUE, true);
+		mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
 		mapper.setSerializationInclusion(Include.NON_NULL);		
 	}
 	
@@ -36,13 +37,23 @@ public class JsonMarshallerTest extends BaseMarshallerTest {
 	}
 	
 	@Test
-	public void testJsonJavaField() throws Exception {	
+	public void testJsonMapJavaField() throws Exception {	
 		AtlasMapping atlasMapping = generateAtlasMapping();
 		//Object to JSON in file
 		mapper.writeValue(new File("target" + File.separator + "junit" + File.separator + testName.getMethodName() + File.separator + "atlasmapping.json"), atlasMapping);
 		AtlasMapping uMapping = mapper.readValue(new File("target" + File.separator + "junit" + File.separator + testName.getMethodName() + File.separator + "atlasmapping.json"), AtlasMapping.class);
 		assertNotNull(uMapping);
 		validateAtlasMapping(uMapping);
+	}
+	
+	@Test
+	public void testJsonSeparateJavaField() throws Exception {	
+		AtlasMapping atlasMapping = generateSeparateAtlasMapping();
+		//Object to JSON in file
+		mapper.writeValue(new File("target" + File.separator + "junit" + File.separator + testName.getMethodName() + File.separator + "atlasmapping-separate.json"), atlasMapping);
+		AtlasMapping uMapping = mapper.readValue(new File("target" + File.separator + "junit" + File.separator + testName.getMethodName() + File.separator + "atlasmapping-separate.json"), AtlasMapping.class);
+		assertNotNull(uMapping);
+		validateSeparateAtlasMapping(uMapping);
 	}
 
 }

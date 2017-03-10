@@ -9,6 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var core_1 = require('@angular/core');
+var error_handler_service_1 = require('../services/error.handler.service');
 var DataMapperErrorComponent = (function () {
     function DataMapperErrorComponent() {
     }
@@ -18,6 +19,10 @@ var DataMapperErrorComponent = (function () {
         var errorIdentifier = eventTarget.attributes.getNamedItem("errorIdentifier").value;
         this.errorService.removeError(errorIdentifier);
     };
+    __decorate([
+        core_1.Input(), 
+        __metadata('design:type', error_handler_service_1.ErrorHandlerService)
+    ], DataMapperErrorComponent.prototype, "errorService", void 0);
     DataMapperErrorComponent = __decorate([
         core_1.Component({
             selector: 'data-mapper-error',

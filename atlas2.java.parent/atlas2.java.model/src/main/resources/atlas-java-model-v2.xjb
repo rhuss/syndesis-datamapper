@@ -21,8 +21,11 @@
 			<annox:annotate><annox:annotate annox:class="com.fasterxml.jackson.annotation.JsonTypeInfo" use="CLASS" include="PROPERTY" property="jsonType"></annox:annotate></annox:annotate>		
         </jaxb:bindings>
 		<jaxb:bindings node="xs:complexType[@name='JavaClass']">
-			<annox:annotate><annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="JavaClass" /></annox:annotate>
-			<annox:annotate><annox:annotate annox:class="com.fasterxml.jackson.annotation.JsonRootName">JavaClass</annox:annotate></annox:annotate>
+			<annox:annotate><annox:annotate annox:class="com.fasterxml.jackson.annotation.JsonTypeInfo" use="CLASS" include="PROPERTY" property="jsonType"></annox:annotate></annox:annotate>		
+        </jaxb:bindings>
+        <jaxb:bindings node="xs:complexType[@name='JavaDocument']">
+			<annox:annotate><annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="JavaDocument" /></annox:annotate>
+			<annox:annotate><annox:annotate annox:class="com.fasterxml.jackson.annotation.JsonRootName">JavaDocument</annox:annotate></annox:annotate>
 			<annox:annotate><annox:annotate annox:class="com.fasterxml.jackson.annotation.JsonTypeInfo" use="CLASS" include="PROPERTY" property="jsonType"></annox:annotate></annox:annotate>		
         </jaxb:bindings>
     </jaxb:bindings>
