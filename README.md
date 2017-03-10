@@ -9,7 +9,7 @@ To run:
 
 3. mvn jetty:run
 
-4. (In new terminal) cd atals2.ui.parent/atlas2.ui.parent/atlas2.ui.core/src/main/webapp/angular2
+4. (In new terminal) cd atlas2.ui.parent/atlas2.ui.parent/atlas2.ui.core/src/main/webapp/angular2
 
 5. npm start
 
