@@ -24,7 +24,7 @@ public class XmlMarshallerTest extends BaseMarshallerTest {
 	public void setUp() throws Exception {
 		super.setUp();
 		
-		this.deleteTestFolders = false;
+		this.deleteTestFolders = true;
 		
 		jaxbContext = JAXBContext.newInstance("com.mediadriver.atlas.v2");
 		

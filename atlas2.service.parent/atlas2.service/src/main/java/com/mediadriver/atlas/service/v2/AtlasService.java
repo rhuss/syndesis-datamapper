@@ -219,7 +219,7 @@ public class AtlasService extends Application {
     }
     
     protected AtlasMapping getMappingFromFile(String fileName) throws Exception {
-    	JAXBContext jaxbContext = JAXBContext.newInstance("com.mediadriver.atlas.v2");
+    	JAXBContext jaxbContext = JAXBContext.newInstance("com.mediadriver.atlas.v2:com.mediadriver.atlas.java.v2");
     	Marshaller marshaller = null;
     	Unmarshaller unmarshaller = null;
 
@@ -236,7 +236,7 @@ public class AtlasService extends Application {
     }
     
     protected void saveMappingToFile(AtlasMapping atlasMapping) throws Exception {
-    	JAXBContext jaxbContext = JAXBContext.newInstance("com.mediadriver.atlas.v2");
+    	JAXBContext jaxbContext = JAXBContext.newInstance("com.mediadriver.atlas.v2:com.mediadriver.atlas.java.v2");
     	Marshaller marshaller = null;
 
 		marshaller = jaxbContext.createMarshaller();

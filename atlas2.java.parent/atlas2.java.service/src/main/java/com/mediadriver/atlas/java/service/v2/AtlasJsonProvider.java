@@ -17,7 +17,10 @@ public class AtlasJsonProvider implements ContextResolver<ObjectMapper> {
 		objectMapper = new ObjectMapper();
 		objectMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, true);
 		objectMapper.configure(DeserializationFeature.UNWRAP_ROOT_VALUE, true);
-		objectMapper.setSerializationInclusion(Include.NON_NULL);		
+		// Causes errors in serialization .. NPE in 
+		// FilteringJacksonJaxbJsonProvider.writeTo(FilteringJacksonJaxbJsonProvider.java:130)
+		//objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+		objectMapper.setSerializationInclusion(Include.NON_NULL);	
 	}
 
 	public ObjectMapper getContext(Class<?> objectType) {

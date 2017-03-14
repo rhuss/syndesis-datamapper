@@ -12,9 +12,16 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.mediadriver.atlas.v2.AtlasMapping;
+import com.mediadriver.atlas.v2.FieldMappings;
+import com.mediadriver.atlas.v2.MappedField;
+import com.mediadriver.atlas.v2.MappedFields;
 import com.mediadriver.atlas.v2.MockField;
+import com.mediadriver.atlas.v2.SeparateFieldMapping;
 import com.mediadriver.atlas.v2.StringMap;
 import com.mediadriver.atlas.v2.StringMapEntry;
 
@@ -23,14 +30,22 @@ import com.mediadriver.atlas.v2.StringMapEntry;
 public class AtlasServiceTest {
 	
 	private AtlasService service = null;
+	private ObjectMapper mapper = null;
 	
 	@Before
 	public void setUp() throws Exception {
 		service = new AtlasService();
+		mapper = new ObjectMapper();
+		mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, true);
+		mapper.configure(DeserializationFeature.UNWRAP_ROOT_VALUE, true);
+		mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+		mapper.setSerializationInclusion(Include.NON_NULL);		
 	}
 
 	@After
 	public void tearDown() throws Exception {
+		service = null;
+		mapper = null;
 	}
 
 	@Test
@@ -52,20 +67,42 @@ public class AtlasServiceTest {
 	@Test
 	public void testFilenameMatch() throws Exception {
 		String fileName = "atlasmapping-foo.xml";
-		
 		assertTrue(fileName.matches("atlasmapping-[a-zA-Z0-9]+.xml"));
 	}
 	
 	@Test
 	public void testAtlasMappingDeserialization() throws Exception {
-		ObjectMapper mapper = new ObjectMapper();
 		File f = new File("src/test/resources/atlasmapping-mockfield-PUT-create-sample.json");
 		AtlasMapping mapping = mapper.readValue(f, AtlasMapping.class);
 	}
 	
 	@Test
+	public void testSeperateMappingSerialization() throws Exception {
+		SeparateFieldMapping s = new SeparateFieldMapping();
+		s.setOutputFields(new MappedFields());
+		MappedField mf = new MappedField();
+		mf.setField(new MockField());		
+		s.setInputField(mf);
+		mf = new MappedField();
+		mf.setField(new MockField());		
+		s.getOutputFields().getMappedField().add(mf);
+		mf = new MappedField();
+		mf.setField(new MockField());		
+		s.getOutputFields().getMappedField().add(mf);
+		AtlasMapping m = new AtlasMapping();
+		m.setFieldMappings(new FieldMappings());
+		m.getFieldMappings().getFieldMapping().add(s);
+		System.out.println(mapper.writeValueAsString(m));
+	}
+	
+	@Test
+	public void testAtlasSeparateMappingDeserialization() throws Exception {
+		File f = new File("src/test/resources/atasmapping-mockfield-PUT-create-seperate-sample.json");
+		AtlasMapping mapping = mapper.readValue(f, AtlasMapping.class);
+	}
+	
+	@Test
 	public void testSimpleFieldDeserialization() throws Exception {
-		ObjectMapper mapper = new ObjectMapper();	
 		File f = new File("src/test/resources/atlasMapping-MockField-simple.json");		
 		MockField field = mapper.readValue(f, MockField.class);
 	}

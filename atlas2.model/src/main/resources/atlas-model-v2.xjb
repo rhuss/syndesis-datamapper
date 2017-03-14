@@ -22,11 +22,31 @@
 		<jaxb:bindings node="xs:complexType[@name='Field']">
 			<annox:annotate><annox:annotate annox:class="com.fasterxml.jackson.annotation.JsonTypeInfo" use="CLASS" include="PROPERTY" property="jsonType"></annox:annotate></annox:annotate>		
         </jaxb:bindings>
+		<jaxb:bindings node="xs:complexType[@name='FieldAction']">
+			<annox:annotate><annox:annotate annox:class="com.fasterxml.jackson.annotation.JsonTypeInfo" use="CLASS" include="PROPERTY" property="jsonType"></annox:annotate></annox:annotate>		
+        </jaxb:bindings>
+		<jaxb:bindings node="xs:complexType[@name='FieldMapping']">
+			<annox:annotate><annox:annotate annox:class="com.fasterxml.jackson.annotation.JsonTypeInfo" use="CLASS" include="PROPERTY" property="jsonType"></annox:annotate></annox:annotate>		
+        </jaxb:bindings>
+        <jaxb:bindings node="xs:complexType[@name='MapFieldMapping']">
+			<annox:annotate><annox:annotate annox:class="com.fasterxml.jackson.annotation.JsonRootName">com.mediadriver.atlas.v2.MapFieldMapping</annox:annotate></annox:annotate>
+        </jaxb:bindings>
+		<jaxb:bindings node="xs:complexType[@name='CombineFieldMapping']">
+			<annox:annotate><annox:annotate annox:class="com.fasterxml.jackson.annotation.JsonTypeInfo" use="CLASS" include="PROPERTY" property="jsonType"></annox:annotate></annox:annotate>		
+        </jaxb:bindings>
+		<jaxb:bindings node="xs:complexType[@name='SeparateFieldMapping']">
+			<annox:annotate><annox:annotate annox:class="com.fasterxml.jackson.annotation.JsonTypeInfo" use="CLASS" include="PROPERTY" property="jsonType"></annox:annotate></annox:annotate>		
+        </jaxb:bindings>
         <jaxb:bindings node="xs:complexType[@name='Document']">
+			<annox:annotate><annox:annotate annox:class="javax.xml.bind.annotation.XmlRootElement" name="Document" /></annox:annotate>
+			<annox:annotate><annox:annotate annox:class="com.fasterxml.jackson.annotation.JsonRootName">Document</annox:annotate></annox:annotate>
 			<annox:annotate><annox:annotate annox:class="com.fasterxml.jackson.annotation.JsonTypeInfo" use="CLASS" include="PROPERTY" property="jsonType"></annox:annotate></annox:annotate>		
         </jaxb:bindings>
         <jaxb:bindings node="xs:complexType[@name='MappedField']">
 			<annox:annotate><annox:annotate annox:class="com.fasterxml.jackson.annotation.JsonTypeInfo" use="CLASS" include="PROPERTY" property="jsonType"></annox:annotate></annox:annotate>		
+        </jaxb:bindings>
+		<jaxb:bindings node="xs:complexType[@name='MockDocument']">
+			<annox:annotate><annox:annotate annox:class="com.fasterxml.jackson.annotation.JsonRootName">com.mediadriver.atlas.v2.MockDocument</annox:annotate></annox:annotate>
         </jaxb:bindings>
 		<jaxb:bindings node="xs:complexType[@name='MockField']">
 			<annox:annotate><annox:annotate annox:class="com.fasterxml.jackson.annotation.JsonRootName">com.mediadriver.atlas.v2.MockField</annox:annotate></annox:annotate>

@@ -17,7 +17,8 @@ public class AtlasJsonProvider implements ContextResolver<ObjectMapper> {
 		objectMapper = new ObjectMapper();
 		objectMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, true);
 		objectMapper.configure(DeserializationFeature.UNWRAP_ROOT_VALUE, true);
-		objectMapper.setSerializationInclusion(Include.NON_NULL);		
+		objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+		objectMapper.setSerializationInclusion(Include.NON_NULL);
 	}
 
 	public ObjectMapper getContext(Class<?> objectType) {

@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.mediadriver.atlas</groupId>
 	<artifactId>atlas2</artifactId>
-	<version>1.8.0-SNAPSHOT</version>
+	<version>1.9.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Atlas :: Project Build</name>
 
@@ -18,7 +18,7 @@
 		<maven-jar-plugin.version>3.0.2</maven-jar-plugin.version>
 		<maven-jaxb2-plugin.version>0.13.1</maven-jaxb2-plugin.version>
 		<maven-resources-plugin.version>3.0.2</maven-resources-plugin.version>
-		<jetty-maven-plugin.version>9.4.0.v20161208</jetty-maven-plugin.version>
+		<jetty-maven-plugin.version>9.4.2.v20170220</jetty-maven-plugin.version>
 		<!-- Atlas specific -->
 		<at.jackson.version>2.8.5</at.jackson.version>
 		<at.jersey.version>2.25.1</at.jersey.version>
@@ -34,6 +34,7 @@
 			<id>parent</id>
 			<modules>
 				<module>atlas2.parent</module>
+				<module>atlas2.mock.parent</module>
 				<module>atlas2.service.parent</module>
 				<module>atlas2.java.parent</module>
 			</modules>
@@ -43,6 +44,9 @@
 			<modules>
 				<module>atlas2.parent</module>
 				<module>atlas2.model</module>
+				<module>atlas2.api</module>
+				<module>atlas2.core</module>
+				<module>atlas2.mock.parent</module>
 				<module>atlas2.service.parent</module>
 				<module>atlas2.java.parent</module>
 			</modules>
@@ -52,12 +56,18 @@
 		</profile>
 		<profile>
 			<id>full</id>
+			<activation><activeByDefault>true</activeByDefault></activation>
 			<modules>
 				<module>atlas2.parent</module>
 				<module>atlas2.model</module>
+				<module>atlas2.api</module>
+				<module>atlas2.core</module>
+				<module>atlas2.mock.parent</module>
 				<module>atlas2.service.parent</module>
 				<module>atlas2.java.parent</module>
+				<module>atlas2.demo.deps</module>
 				<module>atlas2.itests</module>
+				<module>atlas2.itests.parent</module>
 			</modules>
 		</profile>
 	</profiles>
@@ -135,55 +145,10 @@
 		</pluginManagement>
 		<plugins>
 			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>${jdk.version}</source>
-					<target>${jdk.version}</target>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<configuration>
 					<skip>false</skip>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>test-jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<inherited>true</inherited>
-				<extensions>true</extensions>
-				<configuration>
-					<versions>
-						<md.osgi.version>${project.version}</md.osgi.version>
-					</versions>
-					<excludeDependencies>${at.osgi.exclude.dependencies}</excludeDependencies>
-					<instructions>
-						<Bundle-Name>${project.name}</Bundle-Name>
-						<Bundle-SymbolicName>${at.osgi.symbolic.name}</Bundle-SymbolicName>
-						<Bundle-DocURL>${project.url}</Bundle-DocURL>
-						<Export-Package>${at.osgi.export.pkg}</Export-Package>
-						<Import-Package>${at.osgi.import.pkg}</Import-Package>
-						<Implementation-Title>${project.description}</Implementation-Title>
-						<Implementation-Version>${project.version}</Implementation-Version>
-						<Embed-Dependency>${at.osgi.embed.dependency}</Embed-Dependency>
-						<Embed-Transitive>${at.osgi.embed.transitive}</Embed-Transitive>
-						<!-- <Private-Package>${md.osgi.private.pkg}</Private-Package> <Bundle-Activator>${md.osgi.activator}</Bundle-Activator> 
-							<DynamicImport-Package>${md.osgi.dynamic}</DynamicImport-Package> <Include-Resource>${md.osgi.resource}</Include-Resource> 
-							<_versionpolicy>${md.osgi.import.default.version}</_versionpolicy> <_failok>${md.osgi.failok}</_failok> 
-							<Export-Service>${md.osgi.services.export}</Export-Service> <Service-Component>${md.osgi.service.component}</Service-Component> -->
-					</instructions>
 				</configuration>
 			</plugin>
 		</plugins>

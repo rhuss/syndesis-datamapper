@@ -1,5 +1,6 @@
 package com.mediadriver.atlas.v2;
 
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -7,9 +8,9 @@ import java.util.Set;
 public class AtlasModelFactory {
 
 	public static final Set<String> primitiveClasses = new HashSet<String>(Arrays.asList("byte", "short", "int", "long", "float", "double", "boolean", "char"));
-	public static final Set<String> boxedPrimitiveClasses = new HashSet<String>(Arrays.asList("java.lang.Byte", "java.lang.Short", "java.lang.Integer", "java.lang.Long", "java.lang.Float", "java.lang.Double", "java.lang.Boolean", "java.lang.Character"));
+	public static final Set<String> boxedPrimitiveClasses = new HashSet<String>(Arrays.asList("java.lang.Byte", "java.lang.Short", "java.lang.Integer", "java.lang.Long", "java.lang.Float", "java.lang.Double", "java.lang.Boolean", "java.lang.Character", "java.lang.String"));
 		
-	public static FieldType fieldTypeForPrimitiveClassName(String className) {
+	public static FieldType fieldTypeFromClassName(String className) {
 		if(className == null || className.isEmpty()) {
 			return null;
 		}
@@ -34,5 +35,67 @@ public class AtlasModelFactory {
 		case "java.lang.String": return FieldType.STRING;
 		default: return FieldType.UNSUPPORTED;
 		}
+	}
+	
+	public static Class<?> classFromFieldType(FieldType fieldType) {
+		if(fieldType == null) {
+			return null;
+		}
+		
+		switch(fieldType) {
+		case BOOLEAN: return Boolean.class;
+		case BYTE: return Byte.class;
+		case CHAR: return java.lang.Character.class;
+		case DOUBLE: return java.lang.Double.class;
+		case FLOAT: return java.lang.Float.class;
+		case INTEGER: return java.lang.Integer.class;
+		case LONG: return java.lang.Long.class;
+		case SHORT: return java.lang.Short.class;
+		case STRING: return java.lang.String.class;
+		// TODO: need to fix the default return type for non-primitive
+		default: return null;
+		}
+	}
+	
+	public static MockDocument createMockDocument() {
+		MockDocument mockDocument = new MockDocument();
+		mockDocument.setFields(new Fields());
+		return mockDocument;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T extends FieldMapping> T createFieldMapping(Class <T> clazz) {
+		T fm = null;
+		if(clazz == null) {
+			return null;
+		}
+		
+		if(clazz.isAssignableFrom(SeparateFieldMapping.class)) {
+			fm = (T) new SeparateFieldMapping();
+			((SeparateFieldMapping)fm).setOutputFields(new MappedFields());
+			return fm;
+		} else if(clazz.isAssignableFrom(CombineFieldMapping.class)) {
+			fm = (T) new CombineFieldMapping();
+			((CombineFieldMapping)fm).setInputFields(new MappedFields());
+			return fm;
+		} else if(clazz.isAssignableFrom(MapFieldMapping.class)) {
+			fm = (T) new MapFieldMapping();
+			return fm;
+		} else {
+			throw new IllegalStateException("Unsupported class: " + clazz.getName());
+		}
+	}
+	
+	public static AtlasMapping createAtlasMapping() {
+		AtlasMapping mapping = new AtlasMapping();
+		mapping.setFieldMappings(new FieldMappings());
+		mapping.setProperties(new Properties());
+		return mapping;
+	}
+	
+	public static MappedField createMappedField() {
+		MappedField mappedField = new MappedField();
+		mappedField.setFieldActions(new FieldActions());
+		return mappedField;
 	}
 }

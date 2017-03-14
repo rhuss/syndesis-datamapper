@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <AtlasMapping xmlns="http://mediadriver.com/atlas/v2" name="junit4">
     <FieldMappings>
-        <FieldMapping>
+        <FieldMapping xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="MapFieldMapping">
             <InputField>
                 <Field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="MockField" name="foo" value="bar"/>
             </InputField>

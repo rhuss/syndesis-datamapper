@@ -19,11 +19,12 @@ public class JsonMarshallerTest extends BaseMarshallerTest {
 	public void setUp() throws Exception {
 		super.setUp();
 		
-		this.deleteTestFolders = true;
+		this.deleteTestFolders = false;
 		
 		mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, true);
 		mapper.configure(DeserializationFeature.UNWRAP_ROOT_VALUE, true);
+		mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
 		mapper.setSerializationInclusion(Include.NON_NULL);		
 	}
 	

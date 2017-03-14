@@ -1,5 +1,7 @@
 {
-	"jsonType": "com.mediadriver.atlas.v2.MockField",
-	"name": "foo",
-	"value": "bar"
+	"com.mediadriver.atlas.v2.MockField": {
+		"jsonType": "com.mediadriver.atlas.v2.MockField",
+		"name": "foo",
+		"value": "bar"
+	}
 }

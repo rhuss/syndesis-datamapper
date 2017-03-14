@@ -77,7 +77,7 @@ public abstract class BaseMarshallerTest {
 		outputMockField.setValue("blerg");
 		outputField.setField(outputMockField);
 
-		FieldMapping fm = new FieldMapping();
+		MapFieldMapping fm = new MapFieldMapping();
 		fm.setInputField(inputField);
 		fm.setOutputField(outputField);
 
@@ -93,16 +93,14 @@ public abstract class BaseMarshallerTest {
 		assertEquals(new Integer(1), new Integer(mapping.getFieldMappings().getFieldMapping().size()));
 		assertNull(mapping.getProperties());
 
-		FieldMapping fm = mapping.getFieldMappings().getFieldMapping().get(0);
+		MapFieldMapping fm = (MapFieldMapping)mapping.getFieldMappings().getFieldMapping().get(0);
 		assertNotNull(fm);
 		assertNull(fm.getAlias());
-		assertNull(fm.getMultipleInputField());
-		assertNull(fm.getMultipleOutputField());
 
 		MappedField m1 = fm.getInputField();
 		assertNotNull(m1);
-		assertNotNull(m1.getFieldActions());
-		assertTrue(m1.getFieldActions().isEmpty());
+		assertNull(m1.getFieldActions());
+		//assertTrue(m1.getFieldActions().getFieldAction().isEmpty());
 		assertNotNull(m1.getField());
 		Field f1 = m1.getField();		
 		assertTrue(f1 instanceof MockField);
@@ -112,8 +110,8 @@ public abstract class BaseMarshallerTest {
 
 		MappedField m2 = fm.getOutputField();
 		assertNotNull(m2);
-		assertNotNull(m2.getFieldActions());
-		assertTrue(m2.getFieldActions().isEmpty());
+		assertNull(m2.getFieldActions());
+		//assertTrue(m2.getFieldActions().getFieldAction().isEmpty());
 		assertNotNull(m2.getField());
 		Field f2 = m2.getField();		
 		assertTrue(f2 instanceof MockField);
