@@ -19,6 +19,9 @@
 		<maven-jaxb2-plugin.version>0.13.1</maven-jaxb2-plugin.version>
 		<maven-resources-plugin.version>3.0.2</maven-resources-plugin.version>
 		<jetty-maven-plugin.version>9.4.2.v20170220</jetty-maven-plugin.version>
+		<spring-boot.version>1.5.2.RELEASE</spring-boot.version>
+		<resteasy-spring-boot-starter.version>2.3.0-RELEASE</resteasy-spring-boot-starter.version>
+
 		<!-- Atlas specific -->
 		<at.jackson.version>2.8.5</at.jackson.version>
 		<at.jersey.version>2.25.1</at.jersey.version>
@@ -37,6 +40,7 @@
 				<module>atlas2.mock.parent</module>
 				<module>atlas2.service.parent</module>
 				<module>atlas2.java.parent</module>
+				<module>runtime</module>
 			</modules>
 		</profile>
 		<profile>
@@ -49,6 +53,7 @@
 				<module>atlas2.mock.parent</module>
 				<module>atlas2.service.parent</module>
 				<module>atlas2.java.parent</module>
+				<module>runtime</module>
 			</modules>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -68,6 +73,7 @@
 				<module>atlas2.demo.deps</module>
 				<module>atlas2.itests</module>
 				<module>atlas2.itests.parent</module>
+				<module>runtime</module>
 			</modules>
 		</profile>
 	</profiles>
