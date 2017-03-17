@@ -2,13 +2,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.mediadriver.atlas</groupId>
-		<artifactId>atlas2.parent</artifactId>
-		<version>1.9.0-SNAPSHOT</version>
-		<relativePath>../atlas2.parent/pom.xml</relativePath>
+		<groupId>io.atlasmap</groupId>
+		<artifactId>atlas.parent</artifactId>
+		<version>1.9.5-SNAPSHOT</version>
+		<relativePath>../atlas.parent/pom.xml</relativePath>
 	</parent>
 
-	<artifactId>atlas2.api</artifactId>
+	<artifactId>atlas.api</artifactId>
 	<name>Atlas :: API</name>
 	<packaging>bundle</packaging>
 
@@ -19,8 +19,8 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.mediadriver.atlas</groupId>
-			<artifactId>atlas2.model</artifactId>
+			<groupId>io.atlasmap</groupId>
+			<artifactId>atlas.model</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

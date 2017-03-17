@@ -2,13 +2,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.mediadriver.atlas</groupId>
-		<artifactId>atlas2.parent</artifactId>
-		<version>1.9.0-SNAPSHOT</version>
-		<relativePath>../atlas2.parent/pom.xml</relativePath>
+		<groupId>io.atlasmap</groupId>
+		<artifactId>atlas.parent</artifactId>
+		<version>1.9.5-SNAPSHOT</version>
+		<relativePath>../atlas.parent/pom.xml</relativePath>
 	</parent>
 
-	<artifactId>atlas2.demo.deps</artifactId>
+	<artifactId>atlas.demo.deps</artifactId>
 	<packaging>jar</packaging>
 	<name>Atlas :: Demo Dependencies</name>
 
@@ -27,13 +27,13 @@
 	    	this module is temporary, so not bothering to track
 	    	down the exact deps needed -->
 	    <dependency>
-			<groupId>com.mediadriver.atlas</groupId>
-			<artifactId>atlas2.java.service</artifactId>
+			<groupId>io.atlasmap</groupId>
+			<artifactId>atlas.java.service</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.mediadriver.atlas</groupId>
-			<artifactId>atlas2.service</artifactId>
+			<groupId>io.atlasmap</groupId>
+			<artifactId>atlas.service</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
@@ -60,8 +60,8 @@
 						<configuration>
 							<artifactItems>
 								<artifactItem>
-									<groupId>com.mediadriver.atlas</groupId>
-									<artifactId>atlas2.service</artifactId>
+									<groupId>io.atlasmap</groupId>
+									<artifactId>atlas.service</artifactId>
 									<version>${project.version}</version>
 									<type>jar</type>
 									<classifier>tests</classifier>
@@ -71,15 +71,15 @@
 									<excludes>**/*.class</excludes>
 								</artifactItem>
 								<artifactItem>
-									<groupId>com.mediadriver.atlas</groupId>
-									<artifactId>atlas2.service</artifactId>
+									<groupId>io.atlasmap</groupId>
+									<artifactId>atlas.service</artifactId>
 									<version>${project.version}</version>
 									<overWrite>true</overWrite>
 									<outputDirectory>${project.build.directory}/</outputDirectory>
 								</artifactItem>
 								<artifactItem>
-									<groupId>com.mediadriver.atlas</groupId>
-									<artifactId>atlas2.java.service</artifactId>
+									<groupId>io.atlasmap</groupId>
+									<artifactId>atlas.java.service</artifactId>
 									<version>${project.version}</version>
 									<overWrite>true</overWrite>
 									<outputDirectory>${project.build.directory}/</outputDirectory>

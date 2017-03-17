@@ -159,35 +159,29 @@ public class TwitterToSalesForceTest {
 	}
 
 	@Test
-	public void testProcessMapping() {
-		try {
-			AtlasContext context = atlasContextFactory.createContext(generateMapping());
-			AtlasSession session = context.createSession();
-			Status twitterStatus = generateTwitterStatus();
-			session.setInput(twitterStatus);
-			
-			System.out.println("Twitter.Status");
-			System.out.println("\tUser.name: " + twitterStatus.getUser().getName());
-			System.out.println("\tUser.screenName: " + twitterStatus.getUser().getScreenName());
-			System.out.println("\tText: " + twitterStatus.getText());
+	public void testProcessMapping() throws Exception{
+		AtlasContext context = atlasContextFactory.createContext(generateMapping());
+		AtlasSession session = context.createSession();
+		Status twitterStatus = generateTwitterStatus();
+		session.setInput(twitterStatus);
+		
+		System.out.println("Twitter.Status");
+		System.out.println("\tUser.name: " + twitterStatus.getUser().getName());
+		System.out.println("\tUser.screenName: " + twitterStatus.getUser().getScreenName());
+		System.out.println("\tText: " + twitterStatus.getText());
 
-			context.process(session);
+		context.process(session);
 
-			assertNotNull(session);
-			Object target = session.getOutput();
-			assertNotNull(target);
-			assertTrue("org.apache.camel.salesforce.dto.Contact".equals(target.getClass().getCanonicalName()));
-			
-			System.out.println("SFDC.Contact");
-			System.out.println("\tFirstName: " + ((Contact)target).getFirstName());
-			System.out.println("\tLastName: " + ((Contact)target).getLastName());
-			System.out.println("\tTitle: " + ((Contact)target).getTitle());
-			System.out.println("\tDescription: " + ((Contact)target).getDescription());
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
+		assertNotNull(session);
+		Object target = session.getOutput();
+		assertNotNull(target);
+		assertTrue("org.apache.camel.salesforce.dto.Contact".equals(target.getClass().getCanonicalName()));
+		
+		System.out.println("SFDC.Contact");
+		System.out.println("\tFirstName: " + ((Contact)target).getFirstName());
+		System.out.println("\tLastName: " + ((Contact)target).getLastName());
+		System.out.println("\tTitle: " + ((Contact)target).getTitle());
+		System.out.println("\tDescription: " + ((Contact)target).getDescription());
 	}
 
 	protected UriInfo generateTestUriInfo(String baseUri, String absoluteUri) throws Exception {

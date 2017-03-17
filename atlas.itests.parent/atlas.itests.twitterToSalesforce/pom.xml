@@ -1,13 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.mediadriver.atlas</groupId>
-		<artifactId>atlas2.itests.parent</artifactId>
-		<version>1.9.0-SNAPSHOT</version>
+		<groupId>io.atlasmap</groupId>
+		<artifactId>atlas.itests.parent</artifactId>
+		<version>1.9.5-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>atlas2.itests.twitterToSalesforce</artifactId>
+	<artifactId>atlas.itests.twitterToSalesforce</artifactId>
 	<packaging>bundle</packaging>
 	<name>Atlas :: iTests :: Twitter to Salesforce</name>
 
@@ -16,49 +16,49 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.mediadriver.atlas</groupId>
-			<artifactId>atlas2.java.model</artifactId>
+			<groupId>io.atlasmap</groupId>
+			<artifactId>atlas.java.model</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.mediadriver.atlas</groupId>
-			<artifactId>atlas2.javapath</artifactId>
+			<groupId>io.atlasmap</groupId>
+			<artifactId>atlas.javapath</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.mediadriver.atlas</groupId>
-			<artifactId>atlas2.java.module</artifactId>
+			<groupId>io.atlasmap</groupId>
+			<artifactId>atlas.java.module</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.mediadriver.atlas</groupId>
-			<artifactId>atlas2.core</artifactId>
+			<groupId>io.atlasmap</groupId>
+			<artifactId>atlas.core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.mediadriver.atlas</groupId>
-			<artifactId>atlas2.service</artifactId>
+			<groupId>io.atlasmap</groupId>
+			<artifactId>atlas.service</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.mediadriver.atlas</groupId>
-			<artifactId>atlas2.service</artifactId>
+			<groupId>io.atlasmap</groupId>
+			<artifactId>atlas.service</artifactId>
 			<version>${project.version}</version>
 			<classifier>tests</classifier>
 		</dependency>
 		<dependency>
-			<groupId>com.mediadriver.atlas</groupId>
-			<artifactId>atlas2.java.inspect</artifactId>
+			<groupId>io.atlasmap</groupId>
+			<artifactId>atlas.java.inspect</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-            <groupId>org.twitter4j</groupId>
-            <artifactId>twitter4j-core</artifactId>
-            <version>4.0.4</version>
-        </dependency>
-        <dependency>
-			<groupId>com.mediadriver.atlas</groupId>
-			<artifactId>atlas2.demo.deps</artifactId>
+			<groupId>org.twitter4j</groupId>
+			<artifactId>twitter4j-core</artifactId>
+			<version>4.0.4</version>
+		</dependency>
+		<dependency>
+			<groupId>io.atlasmap</groupId>
+			<artifactId>atlas.demo.deps</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

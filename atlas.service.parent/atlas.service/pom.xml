@@ -4,25 +4,25 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>com.mediadriver.atlas</groupId>
-		<artifactId>atlas2.service.parent</artifactId>
-		<version>1.9.0-SNAPSHOT</version>
+		<groupId>io.atlasmap</groupId>
+		<artifactId>atlas.service.parent</artifactId>
+		<version>1.9.5-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>atlas2.service</artifactId>
+	<artifactId>atlas.service</artifactId>
 	<name>Atlas :: Service</name>
 	<packaging>bundle</packaging>
 
 	<dependencies>
 		<dependency>
-			<groupId>com.mediadriver.atlas</groupId>
-			<artifactId>atlas2.model</artifactId>
+			<groupId>io.atlasmap</groupId>
+			<artifactId>atlas.model</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.mediadriver.atlas</groupId>
-			<artifactId>atlas2.java.model</artifactId>
+			<groupId>io.atlasmap</groupId>
+			<artifactId>atlas.java.model</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

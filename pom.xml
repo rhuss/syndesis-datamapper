@@ -1,8 +1,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.mediadriver.atlas</groupId>
-	<artifactId>atlas2</artifactId>
-	<version>1.9.0-SNAPSHOT</version>
+	<groupId>io.atlasmap</groupId>
+	<artifactId>atlas</artifactId>
+	<version>1.9.5-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Atlas :: Project Build</name>
 
@@ -19,10 +19,6 @@
 		<maven-jaxb2-plugin.version>0.13.1</maven-jaxb2-plugin.version>
 		<maven-resources-plugin.version>3.0.2</maven-resources-plugin.version>
 		<jetty-maven-plugin.version>9.4.2.v20170220</jetty-maven-plugin.version>
-		<spring-boot.version>1.5.2.RELEASE</spring-boot.version>
-		<resteasy-spring-boot-starter.version>2.3.0-RELEASE</resteasy-spring-boot-starter.version>
-		<fabric8-maven-plugin.version>3.2.30</fabric8-maven-plugin.version>
-
 		<!-- Atlas specific -->
 		<at.jackson.version>2.8.5</at.jackson.version>
 		<at.jersey.version>2.25.1</at.jersey.version>
@@ -31,30 +27,53 @@
 		<at.jaxb2-basics-annotate.version>1.0.2</at.jaxb2-basics-annotate.version>
 		<at.jaxb2-basics-namespace-prefix.version>1.2</at.jaxb2-basics-namespace-prefix.version>
 		<at.jackson-module-jaxb-annotations.version>2.8.6</at.jackson-module-jaxb-annotations.version>
+		<spring-boot.version>1.5.2.RELEASE</spring-boot.version>
+		<resteasy-spring-boot-starter.version>2.3.0-RELEASE</resteasy-spring-boot-starter.version>
 	</properties>
+
+	<scm>
+		<connection>scm:svn:http://atxbuild1:8000/svn/atlas2/trunk</connection>
+		<developerConnection>scm:svn:http://atxbuild1:8000/svn/atlas2/trunk</developerConnection>
+		<url>http://atxbuild1:8000/svn/atlas2/trunk</url>
+	</scm>
+
+	<distributionManagement>
+		<repository>
+			<id>MDNAS01</id>
+			<name>MDNAS01-releases</name>
+			<url>http://atxbuild1:7080/artifactory/mediadriver-local</url>
+		</repository>
+		<snapshotRepository>
+			<id>MDNAS01</id>
+			<name>MDNAS01-snapshots</name>
+			<url>http://atxbuild1:7080/artifactory/mediadriver-local</url>
+		</snapshotRepository>
+		<site>
+			<id>atxbuild1</id>
+			<url>ftp://atxbuild1/Build/docs/${project.groupId}/${project.artifactId}/${project.version}/</url>
+		</site>
+	</distributionManagement>
 
 	<profiles>
 		<profile>
 			<id>parent</id>
 			<modules>
-				<module>atlas2.parent</module>
-				<module>atlas2.mock.parent</module>
-				<module>atlas2.service.parent</module>
-				<module>atlas2.java.parent</module>
-				<module>runtime</module>
+				<module>atlas.parent</module>
+				<module>atlas.mock.parent</module>
+				<module>atlas.service.parent</module>
+				<module>atlas.java.parent</module>
 			</modules>
 		</profile>
 		<profile>
 			<id>fast</id>
 			<modules>
-				<module>atlas2.parent</module>
-				<module>atlas2.model</module>
-				<module>atlas2.api</module>
-				<module>atlas2.core</module>
-				<module>atlas2.mock.parent</module>
-				<module>atlas2.service.parent</module>
-				<module>atlas2.java.parent</module>
-				<module>runtime</module>
+				<module>atlas.parent</module>
+				<module>atlas.model</module>
+				<module>atlas.api</module>
+				<module>atlas.core</module>
+				<module>atlas.mock.parent</module>
+				<module>atlas.service.parent</module>
+				<module>atlas.java.parent</module>
 			</modules>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -64,16 +83,17 @@
 			<id>full</id>
 			<activation><activeByDefault>true</activeByDefault></activation>
 			<modules>
-				<module>atlas2.parent</module>
-				<module>atlas2.model</module>
-				<module>atlas2.api</module>
-				<module>atlas2.core</module>
-				<module>atlas2.mock.parent</module>
-				<module>atlas2.service.parent</module>
-				<module>atlas2.java.parent</module>
-				<module>atlas2.demo.deps</module>
-				<module>atlas2.itests</module>
-				<module>atlas2.itests.parent</module>
+				<module>atlas.parent</module>
+				<module>atlas.model</module>
+				<module>atlas.api</module>
+				<module>atlas.core</module>
+				<module>atlas.mock.parent</module>
+				<module>atlas.service.parent</module>
+				<module>atlas.java.parent</module>
+				<module>atlas.demo.deps</module>
+				<module>atlas.itests</module>
+				<module>atlas.itests.parent</module>
+				<module>atlas.converters</module>
 				<module>runtime</module>
 			</modules>
 		</profile>
@@ -82,16 +102,6 @@
 	<build>
 		<pluginManagement>
 			<plugins>
-				<plugin>
-					<groupId>io.fabric8</groupId>
-					<artifactId>fabric8-maven-plugin</artifactId>
-					<version>${fabric8-maven-plugin.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-maven-plugin</artifactId>
-					<version>${spring-boot.version}</version>
-				</plugin>
 				<plugin>
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>${maven-compiler-plugin.version}</version>
@@ -170,5 +180,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>

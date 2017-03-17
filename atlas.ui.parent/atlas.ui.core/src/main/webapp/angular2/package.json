@@ -1,7 +1,14 @@
 {
-  "name": "angular-quickstart",
+  "name": "ipaas.data.mapper",
   "version": "1.0.0",
-  "description": "QuickStart package.json from the documentation, supplemented with testing support",
+  "description": "Data Mapper module for iPAAS.",
+  "author": "",
+  "license": "MIT",
+  "keywords": [],
+  "repository" : { 
+    "type" : "git", 
+    "url" : "https://github.com/npm/npm.git"
+  },
   "scripts": {
     "build": "tsc -p src/",
     "build:watch": "tsc -p src/ -w",
@@ -19,10 +26,7 @@
     "pretest:once": "npm run build",
     "test:once": "karma start karma.conf.js --single-run",
     "lint": "tslint ./src/**/*.ts -t verbose"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "MIT",
+  },    
   "dependencies": {
     "@angular/common": "~2.4.0",
     "@angular/compiler": "~2.4.0",

@@ -20,9 +20,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>com.mediadriver.atlas</groupId>
-    <artifactId>atlas2</artifactId>
-    <version>1.9.0-SNAPSHOT</version>
+    <groupId>io.atlasmap</groupId>
+    <artifactId>atlas</artifactId>
+    <version>1.9.5-SNAPSHOT</version>
   </parent>
 
   <artifactId>runtime</artifactId>
@@ -101,13 +101,13 @@
 
     <!-- === Internal dependencies (don't touch without discussion) ========================== -->
     <dependency>
-      <groupId>com.mediadriver.atlas</groupId>
-      <artifactId>atlas2.java.service</artifactId>
+      <groupId>io.atlasmap</groupId>
+      <artifactId>atlas.java.service</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.mediadriver.atlas</groupId>
-      <artifactId>atlas2.service</artifactId>
+      <groupId>io.atlasmap</groupId>
+      <artifactId>atlas.service</artifactId>
       <version>${project.version}</version>
     </dependency>
 

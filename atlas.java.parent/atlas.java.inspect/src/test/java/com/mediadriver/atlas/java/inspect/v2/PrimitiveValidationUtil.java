@@ -1,6 +1,8 @@
 package com.mediadriver.atlas.java.inspect.v2;
 
 import static org.junit.Assert.*;
+
+import com.mediadriver.atlas.java.v2.AtlasJavaModelFactory;
 import com.mediadriver.atlas.java.v2.JavaClass;
 
 public class PrimitiveValidationUtil {
@@ -38,5 +40,7 @@ public class PrimitiveValidationUtil {
 		assertNotNull(j.getJavaEnumFields().getJavaEnumField());
 		assertTrue(j.getJavaEnumFields().getJavaEnumField().size() == 0);
 		assertNull(j.getPackageName());
+		assertNotNull(j.getUri());
+		assertEquals(String.format(AtlasJavaModelFactory.URI_FORMAT, j.getFullyQualifiedName()), j.getUri());
 	}
 }

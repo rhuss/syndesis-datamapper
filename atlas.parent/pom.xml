@@ -2,13 +2,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.mediadriver.atlas</groupId>
-		<artifactId>atlas2</artifactId>
-		<version>1.9.0-SNAPSHOT</version>
+		<groupId>io.atlasmap</groupId>
+		<artifactId>atlas</artifactId>
+		<version>1.9.5-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>atlas2.parent</artifactId>
+	<artifactId>atlas.parent</artifactId>
 	<name>Atlas :: Parent POM</name>
 	<packaging>pom</packaging>
 

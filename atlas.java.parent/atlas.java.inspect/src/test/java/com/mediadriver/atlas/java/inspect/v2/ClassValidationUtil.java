@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.mediadriver.atlas.java.v2.AtlasJavaModelFactory;
 import com.mediadriver.atlas.java.v2.JavaClass;
 import com.mediadriver.atlas.java.v2.JavaField;
 import com.mediadriver.atlas.v2.Field;
@@ -110,6 +111,8 @@ public class ClassValidationUtil {
 		assertFalse(flatClass.isMemberClass());
 		assertFalse(flatClass.isPrimitive());
 		assertFalse(flatClass.isSynthetic());
+		assertNotNull(flatClass.getUri());
+		assertEquals(String.format(AtlasJavaModelFactory.URI_FORMAT, flatClass.getFullyQualifiedName()), flatClass.getUri());
 	}
 	
 	public static void validateFlatPrimitiveFields(JavaClass flatClass) throws Exception {
@@ -216,6 +219,8 @@ public class ClassValidationUtil {
 		assertFalse(c.isMemberClass());
 		assertFalse(c.isPrimitive());
 		assertFalse(c.isSynthetic());
+		assertNotNull(c.getUri());
+		assertEquals(String.format(AtlasJavaModelFactory.URI_FORMAT, c.getFullyQualifiedName()), c.getUri());
 		assertEquals("com.mediadriver.atlas.java.test.v2.TestContact", c.getClassName());
 		assertEquals("com.mediadriver.atlas.java.test.v2", c.getPackageName());
 		assertEquals("com.mediadriver.atlas.java.test.v2.TestContact", c.getFullyQualifiedName());
@@ -250,6 +255,8 @@ public class ClassValidationUtil {
 		assertFalse(c.isMemberClass());
 		assertFalse(c.isPrimitive());
 		assertFalse(c.isSynthetic());
+		assertNotNull(c.getUri());
+		assertEquals(String.format(AtlasJavaModelFactory.URI_FORMAT, c.getFullyQualifiedName()), c.getUri());
 		assertEquals("com.mediadriver.atlas.java.test.v2.TestAddress", c.getClassName());
 		assertEquals("com.mediadriver.atlas.java.test.v2", c.getPackageName());
 		assertEquals("com.mediadriver.atlas.java.test.v2.TestAddress", c.getFullyQualifiedName());

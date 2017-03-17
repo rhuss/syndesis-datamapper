@@ -4,8 +4,10 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import com.mediadriver.atlas.java.test.v2.TestOrder;
+import com.mediadriver.atlas.java.v2.AtlasJavaModelFactory;
 import com.mediadriver.atlas.java.v2.JavaClass;
 import com.mediadriver.atlas.java.v2.JavaField;
+import com.mediadriver.atlas.v2.FieldStatus;
 
 public class ComplexClassInspectTest {
 
@@ -27,6 +29,9 @@ public class ComplexClassInspectTest {
 		assertEquals("com.mediadriver.atlas.java.test.v2", c.getPackageName());
 		assertNull(c.getSetMethod());
 		assertNull(c.getType());
+		assertNotNull(c.getUri());
+		assertEquals(String.format(AtlasJavaModelFactory.URI_FORMAT, "com.mediadriver.atlas.java.test.v2.TestOrder"), c.getUri());
+	
 		assertNull(c.getValue());
 		
 		assertEquals(new Integer(3), new Integer(c.getJavaFields().getJavaField().size()));
@@ -34,11 +39,15 @@ public class ComplexClassInspectTest {
 		Integer validated = 0;
 		for(JavaField f : c.getJavaFields().getJavaField()) {
 			if("com.mediadriver.atlas.java.test.v2.TestContact".equals(f.getClassName())) {
-				ClassValidationUtil.validateSimpleTestContact((JavaClass)f);
+				if(!FieldStatus.CACHED.equals(f.getStatus())) {
+					ClassValidationUtil.validateSimpleTestContact((JavaClass)f);
+				}
 				validated++;
 			}
 			if("com.mediadriver.atlas.java.test.v2.TestAddress".equals(f.getClassName())) {
-				ClassValidationUtil.validateSimpleTestAddress((JavaClass)f);
+				if(!FieldStatus.CACHED.equals(f.getStatus())) {
+					ClassValidationUtil.validateSimpleTestAddress((JavaClass)f);
+				}
 				validated++;
 			}
 			if("long".equals(f.getClassName())) {

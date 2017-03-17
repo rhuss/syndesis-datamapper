@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html style="height:100%;">
   <head>
     <title>Angular QuickStart</title>
     <meta charset="UTF-8">
@@ -14,30 +14,30 @@
 
     <script src="systemjs.config.js"></script>
 
-    <link rel="stylesheet" href="lib/patternfly-3.19.0/css/patternfly.min.css" >
-    <link rel="stylesheet" href="lib/patternfly-3.19.0/css/patternfly-additions.min.css" >
-    <script src="lib/patternfly-3.19.0/js/jquery-2.1.4.min.js"></script>
+    <link rel="stylesheet" href="app/lib/patternfly-3.19.0/css/patternfly.min.css" >
+    <link rel="stylesheet" href="app/lib/patternfly-3.19.0/css/patternfly-additions.min.css" >
+    <script src="app/lib/patternfly-3.19.0/js/jquery-2.1.4.min.js"></script>
     <!--
     <link href="tests.css" rel="stylesheet" media="screen, print">    
     -->
-    <script src="lib/patternfly-3.19.0/js/bootstrap.min.js"></script>
-    <script src="lib/patternfly-3.19.0/js/jquery.dataTables.min.js"></script>
-    <script src="lib/patternfly-3.19.0/js/dataTables.select.min.js"></script>
-    <script src="lib/patternfly-3.19.0/js/bootstrap-select.min.js"></script>
+    <script src="app/lib/patternfly-3.19.0/js/bootstrap.min.js"></script>
+    <script src="app/lib/patternfly-3.19.0/js/jquery.dataTables.min.js"></script>
+    <script src="app/lib/patternfly-3.19.0/js/dataTables.select.min.js"></script>
+    <script src="app/lib/patternfly-3.19.0/js/bootstrap-select.min.js"></script>
 
-    <script src="lib/patternfly-3.19.0/js/patternfly.dataTables.pfEmpty.js"></script>
-    <script src="lib/patternfly-3.19.0/js/patternfly.dataTables.pfFilter.js"></script>
-    <script src="lib/patternfly-3.19.0/js/patternfly.dataTables.pfResize.js"></script>
-    <script src="lib/patternfly-3.19.0/js/patternfly.dataTables.pfSelect.js"></script>
-    <script src="lib/patternfly-3.19.0/js/patternfly.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="lib/font-awesome-4.7.0/css/font-awesome.min.css">
+    <script src="app/lib/patternfly-3.19.0/js/patternfly.dataTables.pfEmpty.js"></script>
+    <script src="app/lib/patternfly-3.19.0/js/patternfly.dataTables.pfFilter.js"></script>
+    <script src="app/lib/patternfly-3.19.0/js/patternfly.dataTables.pfResize.js"></script>
+    <script src="app/lib/patternfly-3.19.0/js/patternfly.dataTables.pfSelect.js"></script>
+    <script src="app/lib/patternfly-3.19.0/js/patternfly.min.js"></script>
+    <link rel="stylesheet" href="app/lib/ipaas-data-mapper/styles.css">
+    <link rel="stylesheet" href="app/lib/font-awesome-4.7.0/css/font-awesome.min.css">
     <script>
       System.import('main.js').catch(function(err){ console.error(err); });
     </script>
   </head>
 
-  <body class="cards-pf">
+  <body style="height:100%; overflow:hidden;">
     <nav class="navbar navbar-default navbar-pf" role="navigation">
       <div class="navbar-header">
         <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse-1">
@@ -57,15 +57,16 @@
         </ul>        
       </div>
     </nav>
-    <div class="container fill">      
-    		<div class="row toolbar-pf">
-			    <ol class="breadcrumb">
-			      <li><a href="#">Dashboard</a></li>
-			      <li><a href="#">Create an integration</a></li>
-			      <li class="active"><strong>Data Mapping Canvas</strong></li>
-			    </ol>
-    		</div>        
-			<data-mapper-example-host>Loading AppComponent content here ...</data-mapper-example-host>
+
+    <div class="row toolbar-pf" style="">
+      <ol class="breadcrumb">
+        <li><a href="#">Dashboard</a></li>
+        <li><a href="#">Create an integration</a></li>
+        <li class="active"><strong>Data Mapping Canvas</strong></li>
+      </ol>
+    </div>        
+    <div style="height:calc(100% - 118px);">          		
+			<dev-root></dev-root>
     </div>
   </body>
 </html>

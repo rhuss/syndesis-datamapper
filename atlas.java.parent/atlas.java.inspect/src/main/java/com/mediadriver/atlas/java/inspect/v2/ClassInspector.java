@@ -107,6 +107,10 @@ public class ClassInspector implements Serializable {
 	}
 	
 	public static JavaClass inspectClass(Class<?> clazz) {
+		if(clazz == null) {
+			throw new IllegalArgumentException("Class must be specified");
+		}
+		
 		JavaClass javaClass = AtlasJavaModelFactory.createJavaClass();
 		inspectClass(clazz, javaClass, new HashSet<String>());
 		return javaClass;
@@ -137,6 +141,10 @@ public class ClassInspector implements Serializable {
 		javaClass.setMemberClass(clz.isMemberClass());
 		javaClass.setPrimitive(clz.isPrimitive());
 		javaClass.setSynthetic(clz.isSynthetic());
+		
+		if(javaClass.getUri() == null) {
+			javaClass.setUri(String.format(AtlasJavaModelFactory.URI_FORMAT, clz.getCanonicalName()));
+		}
 			
 		Field[] fields = clz.getDeclaredFields();
 		if (fields != null) {
@@ -512,7 +520,11 @@ public class ClassInspector implements Serializable {
 		javaClass.setSetMethod(javaField.getSetMethod());
 		javaClass.setStatus(javaField.getStatus());
 		javaClass.setType(javaField.getType());
+		if(javaField.getClassName() != null) {
+			javaClass.setUri(String.format(AtlasJavaModelFactory.URI_FORMAT, javaField.getClassName()));
+		}
 		javaClass.setValue(javaField.getValue());
+		
 		return javaClass;
 	}
 }

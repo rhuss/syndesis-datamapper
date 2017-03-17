@@ -3,13 +3,12 @@
 	
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.mediadriver.atlas</groupId>
-	<artifactId>atlas2.ui.core</artifactId>
-	<version>1.1.0-SNAPSHOT</version>
+	<groupId>io.atlasmap</groupId>
+	<artifactId>atlas.ui.core</artifactId>
+	<version>1.9.5-SNAPSHOT</version>
 	<name>Atlas :: UI :: Core</name>
 	<packaging>war</packaging>
 	
-
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>

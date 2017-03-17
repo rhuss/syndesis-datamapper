@@ -69,6 +69,7 @@
 				<attribute name="interface" type="boolean" use="optional" />
 				<attribute name="localClass" type="boolean" use="optional" />
 				<attribute name="memberClass" type="boolean" use="optional" />
+				<attribute name="uri" type="string" use="optional" />
 			</extension>
 		</complexContent>
 	</complexType>
