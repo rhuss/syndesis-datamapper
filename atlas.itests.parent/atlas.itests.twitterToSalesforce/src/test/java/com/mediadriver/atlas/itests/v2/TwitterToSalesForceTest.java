@@ -157,10 +157,22 @@ public class TwitterToSalesForceTest {
 
 		return mapping;
 	}
-
+	
+	
 	@Test
-	public void testProcessMapping() throws Exception{
-		AtlasContext context = atlasContextFactory.createContext(generateMapping());
+	public void testProcessLoadedMapping() throws Exception {
+		String filename = "src/test/resources/atlasmapping-UI.820809.xml";
+		AtlasMapping mapping = atlasService.getMappingFromFile(filename);
+		verifyMappingProcessing(mapping);
+	}
+	
+	@Test
+	public void testProcessGeneratedMapping() throws Exception {
+		verifyMappingProcessing(generateMapping());
+	}
+
+	public void verifyMappingProcessing(AtlasMapping mapping) throws Exception {
+		AtlasContext context = atlasContextFactory.createContext(mapping);
 		AtlasSession session = context.createSession();
 		Status twitterStatus = generateTwitterStatus();
 		session.setInput(twitterStatus);

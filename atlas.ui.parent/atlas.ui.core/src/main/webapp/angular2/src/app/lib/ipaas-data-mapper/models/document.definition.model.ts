@@ -139,12 +139,12 @@ export class DocumentDefinition {
     }
 
     private populateFieldParentPaths(field: Field, parentPath: string, depth: number): void {        
-        field.path = parentPath + field.name;
+        field.path = parentPath + field.displayName;
         field.serviceObject.path = field.path;
         field.fieldDepth = depth;
         for (let childField of field.children) {
             childField.parentField = field;
-            this.populateFieldParentPaths(childField, parentPath + field.name + this.pathSeparator, depth + 1);
+            this.populateFieldParentPaths(childField, parentPath + field.displayName + this.pathSeparator, depth + 1);
         }
     }
 

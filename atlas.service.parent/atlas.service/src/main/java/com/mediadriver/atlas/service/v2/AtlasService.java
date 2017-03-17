@@ -218,7 +218,7 @@ public class AtlasService extends Application {
     			.build();
     }
     
-    protected AtlasMapping getMappingFromFile(String fileName) throws Exception {
+    public AtlasMapping getMappingFromFile(String fileName) throws Exception {
     	JAXBContext jaxbContext = JAXBContext.newInstance("com.mediadriver.atlas.v2:com.mediadriver.atlas.java.v2");
     	Marshaller marshaller = null;
     	Unmarshaller unmarshaller = null;
