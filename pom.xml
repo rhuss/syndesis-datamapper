@@ -31,30 +31,70 @@
 		<resteasy-spring-boot-starter.version>2.3.0-RELEASE</resteasy-spring-boot-starter.version>
 	</properties>
 
+	<description>The AtlasMap Project</description>
+	<url>http://www.atlasmap.io</url>
+	<inceptionYear>2017</inceptionYear>
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	<developers>
+		<developer>
+			<id>chirino</id>
+			<name>Hiram Chirino</name>
+			<email>hiram@hiramchirino.com</email>
+			<url>http://hiramchirino.com</url>
+			<timezone>-5</timezone>
+		</developer>
+	</developers>
+	<scm>
+		<connection>git:https://github.com/redhat-ipaas/ipaas-datamapper.git</connection>
+		<developerConnection>git:git@github.com:redhat-ipaas/ipaas-datamapper.git</developerConnection>
+		<url>https://github.com/redhat-ipaas/ipaas-datamapper</url>
+	</scm>
+	<!--
 	<scm>
 		<connection>scm:svn:http://atxbuild1:8000/svn/atlas2/trunk</connection>
 		<developerConnection>scm:svn:http://atxbuild1:8000/svn/atlas2/trunk</developerConnection>
 		<url>http://atxbuild1:8000/svn/atlas2/trunk</url>
 	</scm>
+	-->
 
 	<distributionManagement>
-		<repository>
-			<id>MDNAS01</id>
-			<name>MDNAS01-releases</name>
-			<url>http://atxbuild1:7080/artifactory/mediadriver-local</url>
-		</repository>
 		<snapshotRepository>
-			<id>MDNAS01</id>
-			<name>MDNAS01-snapshots</name>
-			<url>http://atxbuild1:7080/artifactory/mediadriver-local</url>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 		</snapshotRepository>
-		<site>
-			<id>atxbuild1</id>
-			<url>ftp://atxbuild1/Build/docs/${project.groupId}/${project.artifactId}/${project.version}/</url>
-		</site>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
 	</distributionManagement>
 
 	<profiles>
+		<profile>
+			<id>mediadriver-repos</id>			
+			<distributionManagement>
+				<repository>
+					<id>MDNAS01</id>
+					<name>MDNAS01-releases</name>
+					<url>http://atxbuild1:7080/artifactory/mediadriver-local</url>
+				</repository>
+				<snapshotRepository>
+					<id>MDNAS01</id>
+					<name>MDNAS01-snapshots</name>
+					<url>http://atxbuild1:7080/artifactory/mediadriver-local</url>
+				</snapshotRepository>
+				<site>
+					<id>atxbuild1</id>
+					<url>ftp://atxbuild1/Build/docs/${project.groupId}/${project.artifactId}/${project.version}/</url>
+				</site>
+			</distributionManagement>			
+		</profile>
+
 		<profile>
 			<id>parent</id>
 			<modules>
@@ -96,6 +136,53 @@
 				<module>atlas.converters</module>
 				<module>runtime</module>
 			</modules>
+		</profile>
+		<profile>
+			<id>release</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>2.2.1</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>2.9.1</version>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.5</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>				
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 
@@ -168,6 +255,17 @@
 						</lifecycleMappingMetadata>
 					</configuration>
 				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-release-plugin</artifactId>
+					<version>2.5.3</version>
+					<configuration>
+						<autoVersionSubmodules>true</autoVersionSubmodules>
+						<useReleaseProfile>false</useReleaseProfile>
+						<releaseProfiles>full,release</releaseProfiles>
+						<goals>deploy</goals>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -176,6 +274,17 @@
 				<artifactId>maven-deploy-plugin</artifactId>
 				<configuration>
 					<skip>false</skip>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.7</version>
+				<extensions>true</extensions>
+				<configuration>
+					<serverId>ossrh</serverId>
+					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+					<autoReleaseAfterClose>false</autoReleaseAfterClose>
 				</configuration>
 			</plugin>
 		</plugins>

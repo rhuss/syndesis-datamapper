@@ -98,7 +98,7 @@ public class AtlasUtil {
 	 * scheme: atlas
 	 * module: stringseparated
 	 * remaining: csv 
-	 * config: quoteChar=&quot
+	 * config: quoteChar=&quot;
 	 * 
 	 * if atlasUri is null, returns null. if empty or no scheme present, returns empty. otherwise, the $scheme is returned
 	 * 
