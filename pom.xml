@@ -15,9 +15,14 @@
 		<maven-compiler-plugin.version>3.6.1</maven-compiler-plugin.version>
 		<maven-dependency-plugin.version>3.0.0</maven-dependency-plugin.version>
 		<maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
+		<maven-gpg-plugin.version>1.5</maven-gpg-plugin.version>
 		<maven-jar-plugin.version>3.0.2</maven-jar-plugin.version>
+		<maven-javadoc-plugin.version>2.9.1</maven-javadoc-plugin.version>
 		<maven-jaxb2-plugin.version>0.13.1</maven-jaxb2-plugin.version>
 		<maven-resources-plugin.version>3.0.2</maven-resources-plugin.version>
+		<maven-release-plugin.version>2.5.3</maven-release-plugin.version>
+		<maven-source-plugin.version>2.2.1</maven-source-plugin.version>
+		<nexus-staging-maven-plugin.version>1.6.7</nexus-staging-maven-plugin.version>
 		<jetty-maven-plugin.version>9.4.2.v20170220</jetty-maven-plugin.version>
 		<!-- Atlas specific -->
 		<at.jackson.version>2.8.5</at.jackson.version>
@@ -42,6 +47,13 @@
 		</license>
 	</licenses>
 	<developers>
+                <developer>
+                        <id>mattrpav</id>
+                        <name>Matt Pavlovich</name>
+                        <email>matt@mediadriver.com</email>
+                        <url>http://mediadriver.com</url>
+                        <timezone>-6</timezone>
+                </developer>
 		<developer>
 			<id>chirino</id>
 			<name>Hiram Chirino</name>
@@ -55,13 +67,6 @@
 		<developerConnection>git:git@github.com:redhat-ipaas/ipaas-datamapper.git</developerConnection>
 		<url>https://github.com/redhat-ipaas/ipaas-datamapper</url>
 	</scm>
-	<!--
-	<scm>
-		<connection>scm:svn:http://atxbuild1:8000/svn/atlas2/trunk</connection>
-		<developerConnection>scm:svn:http://atxbuild1:8000/svn/atlas2/trunk</developerConnection>
-		<url>http://atxbuild1:8000/svn/atlas2/trunk</url>
-	</scm>
-	-->
 
 	<distributionManagement>
 		<snapshotRepository>
@@ -75,26 +80,6 @@
 	</distributionManagement>
 
 	<profiles>
-		<profile>
-			<id>mediadriver-repos</id>			
-			<distributionManagement>
-				<repository>
-					<id>MDNAS01</id>
-					<name>MDNAS01-releases</name>
-					<url>http://atxbuild1:7080/artifactory/mediadriver-local</url>
-				</repository>
-				<snapshotRepository>
-					<id>MDNAS01</id>
-					<name>MDNAS01-snapshots</name>
-					<url>http://atxbuild1:7080/artifactory/mediadriver-local</url>
-				</snapshotRepository>
-				<site>
-					<id>atxbuild1</id>
-					<url>ftp://atxbuild1/Build/docs/${project.groupId}/${project.artifactId}/${project.version}/</url>
-				</site>
-			</distributionManagement>			
-		</profile>
-
 		<profile>
 			<id>parent</id>
 			<modules>
@@ -142,9 +127,7 @@
 			<build>
 				<plugins>
 					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-source-plugin</artifactId>
-						<version>2.2.1</version>
 						<executions>
 							<execution>
 								<id>attach-sources</id>
@@ -155,9 +138,7 @@
 						</executions>
 					</plugin>
 					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>2.9.1</version>
 						<executions>
 							<execution>
 								<id>attach-javadocs</id>
@@ -168,9 +149,7 @@
 						</executions>
 					</plugin>
 					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.5</version>
 						<executions>
 							<execution>
 								<id>sign-artifacts</id>
@@ -202,12 +181,28 @@
 					<version>${maven-deploy-plugin.version}</version>
 				</plugin>
 				<plugin>
+					<artifactId>maven-gpg-plugin</artifactId>
+					<version>${maven-gpg-plugin.version}</version>
+				</plugin>
+				<plugin>
 					<artifactId>maven-jar-plugin</artifactId>
 					<version>${maven-jar-plugin.version}</version>
 				</plugin>
 				<plugin>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>${maven-javadoc-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-release-plugin</artifactId>
+					<version>${maven-release-plugin.version}</version>
+				</plugin>
+				<plugin>
 					<artifactId>maven-resources-plugin</artifactId>
 					<version>${maven-resources-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>${maven-source-plugin.version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.felix</groupId>
@@ -228,6 +223,11 @@
 					<groupId>org.eclipse.jetty</groupId>
 					<artifactId>jetty-maven-plugin</artifactId>
 					<version>${jetty-maven-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.sonatype.plugins</groupId>
+					<artifactId>nexus-staging-maven-plugin</artifactId>
+					<version>${nexus-staging-maven-plugin.version}</version>
 				</plugin>
 				<!--This plugin's configuration is used to store Eclipse m2e settings 
 					only. It has no influence on the Maven build itself. -->
@@ -255,17 +255,6 @@
 						</lifecycleMappingMetadata>
 					</configuration>
 				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-release-plugin</artifactId>
-					<version>2.5.3</version>
-					<configuration>
-						<autoVersionSubmodules>true</autoVersionSubmodules>
-						<useReleaseProfile>false</useReleaseProfile>
-						<releaseProfiles>full,release</releaseProfiles>
-						<goals>deploy</goals>
-					</configuration>
-				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -277,9 +266,17 @@
 				</configuration>
 			</plugin>
 			<plugin>
+				<artifactId>maven-release-plugin</artifactId>
+				<configuration>
+					<autoVersionSubmodules>true</autoVersionSubmodules>
+					<useReleaseProfile>false</useReleaseProfile>
+					<releaseProfiles>full,release</releaseProfiles>
+					<goals>deploy</goals>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.sonatype.plugins</groupId>
 				<artifactId>nexus-staging-maven-plugin</artifactId>
-				<version>1.6.7</version>
 				<extensions>true</extensions>
 				<configuration>
 					<serverId>ossrh</serverId>
