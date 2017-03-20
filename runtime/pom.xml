@@ -75,8 +75,8 @@
           <generator>
             <config>
               <spring-boot>
-                <name>rhipaas/ipaas-datamapper:%l</name>
-                <from>registry.access.redhat.com/jboss-fuse-6/fis-java-openshift:2.0</from>
+                <name>${docker.image}</name>
+                <from>${from.image}</from>
               </spring-boot>
             </config>
           </generator>
@@ -152,7 +152,6 @@
               <execution>
                 <id>fmp</id>
                 <goals>
-                  <goal>resource</goal>
                   <goal>build</goal>
                 </goals>
               </execution>

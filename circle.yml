@@ -22,24 +22,24 @@ machine:
 
 dependencies:
   override:
-  - ./mvnw -Pfull -Pfabric8 -Dfabric8.skip -DskipTests package dependency:go-offline
+  - ./mvnw --batch-mode -Pfull -Pfabric8 -Dfabric8.skip -DskipTests package dependency:go-offline
 test:
   override:
-  - ./mvnw -Pfull -Pfabric8 install 
+  - ./mvnw --batch-mode -Pfull -Pfabric8 -Dfabric8.mode=kubernetes install 
   post:
   - mkdir -p $CIRCLE_TEST_REPORTS/junit/
   - find . -type f -regex ".*/target/.*-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
   - bash <(curl -s https://codecov.io/bash)
 
-#deployment:
-#  staging:
-#    owner: redhat-ipaas
-#    branch: master
-#    commands:
-#    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD -e $DOCKER_EMAIL
-#    - docker push rhipaas/ipaas-datamapper:latest | cat -
-#    - curl -sSL https://github.com/openshift/origin/releases/download/v1.4.1/openshift-origin-client-tools-v1.4.1-3f9807a-linux-64bit.tar.gz | sudo tar xz -C /usr/bin --strip-components 1
-#    - oc login --server=${OPENSHIFT_APISERVER} --token=${OPENSHIFT_TOKEN}
-#    - oc project ipaas-staging
-#    - oc import-image rhipaas/ipaas-datamapper:latest
+deployment:
+  staging:
+    owner: redhat-ipaas
+    branch: master
+    commands:
+    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD -e $DOCKER_EMAIL
+    - docker push atlasmap/ipaas-datamapper:latest | cat -
+    - curl -sSL https://github.com/openshift/origin/releases/download/v1.4.1/openshift-origin-client-tools-v1.4.1-3f9807a-linux-64bit.tar.gz | sudo tar xz -C /usr/bin --strip-components 1
+    - oc login --server=${OPENSHIFT_APISERVER} --token=${OPENSHIFT_TOKEN}
+    - oc project ipaas-staging
+    - oc import-image atlasmap/ipaas-datamapper:latest
 
