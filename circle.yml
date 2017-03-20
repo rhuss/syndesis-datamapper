@@ -22,10 +22,10 @@ machine:
 
 dependencies:
   override:
-  - ./mvnw -Pfull -Pfabric8 -Dfabric8.skip -DskipTests package dependency:go-offline
+  - ./mvnw --batch-mode -Pfull -Pfabric8 -Dfabric8.skip -DskipTests package dependency:go-offline
 test:
   override:
-  - ./mvnw -Pfull -Pfabric8 install -Dfabric8.mode=kubernetes
+  - ./mvnw --batch-mode -Pfull -Pfabric8 -Dfabric8.mode=kubernetes install 
   post:
   - mkdir -p $CIRCLE_TEST_REPORTS/junit/
   - find . -type f -regex ".*/target/.*-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
