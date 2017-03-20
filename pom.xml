@@ -34,6 +34,11 @@
 		<at.jackson-module-jaxb-annotations.version>2.8.6</at.jackson-module-jaxb-annotations.version>
 		<spring-boot.version>1.5.2.RELEASE</spring-boot.version>
 		<resteasy-spring-boot-starter.version>2.3.0-RELEASE</resteasy-spring-boot-starter.version>
+        <fabric8-maven-plugin.version>3.2.30</fabric8-maven-plugin.version>
+
+        <!-- Controls Docker Image Generation -->
+        <from.image>registry.access.redhat.com/jboss-fuse-6/fis-java-openshift:2.0</from.image>
+        <docker.image>atlasmap/ipaas-datamapper:%l</docker.image>
 	</properties>
 
 	<description>The AtlasMap Project</description>
@@ -168,6 +173,16 @@
 	<build>
 		<pluginManagement>
 			<plugins>
+                <plugin>
+                    <groupId>io.fabric8</groupId>
+                    <artifactId>fabric8-maven-plugin</artifactId>
+                    <version>${fabric8-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring-boot.version}</version>
+                </plugin>				
 				<plugin>
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>${maven-compiler-plugin.version}</version>
