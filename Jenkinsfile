@@ -14,11 +14,7 @@ slave {
                     }
 
                     stage 'System Tests'
-                    test(component: 'ipaas-datamapper', namespace: "${testingNamespace}", serviceAccount: 'jenkins')
-
-                    stage 'Rollout'
-                    tag(sourceProject: 'ipaas-ci', imageStream: 'ipaas-datamapper')
-                    rollout(deploymentConfig: 'ipaas-datamapper', namespace: 'ipaas-staging')
+                    test(component: 'ipaas-rest', namespace: "${testingNamespace}", serviceAccount: 'jenkins')
                  }
 
         }
