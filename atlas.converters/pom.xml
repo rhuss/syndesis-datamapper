@@ -51,6 +51,11 @@
             <artifactId>atlas.java.model</artifactId>
             <version>${project.version}</version>
         </dependency>
+	<dependency>
+            <groupId>org.apache.bcel</groupId>
+            <artifactId>bcel</artifactId>
+            <version>6.0</version>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
