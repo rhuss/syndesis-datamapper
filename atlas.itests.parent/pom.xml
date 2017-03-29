@@ -42,6 +42,7 @@
 				<module>atlas.itests.core</module>
 				<module>atlas.itests.java.inspect.twitter4j</module>
 				<module>atlas.itests.twitterToSalesforce</module>
+				<module>atlas.itests.ipaasTwitterToSFDC</module>
 				<module>atlas.itests.concurrency</module>
 			</modules>
 		</profile>
