@@ -15,9 +15,10 @@
  */
 package com.mediadriver.atlas.java.inspect.v2;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class StringUtilTest {
 

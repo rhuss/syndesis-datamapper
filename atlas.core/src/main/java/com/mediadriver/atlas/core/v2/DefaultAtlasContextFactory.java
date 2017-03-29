@@ -15,9 +15,23 @@
  */
 package com.mediadriver.atlas.core.v2;
 
+import com.mediadriver.atlas.api.v2.AtlasContext;
+import com.mediadriver.atlas.api.v2.AtlasContextFactory;
+import com.mediadriver.atlas.api.v2.AtlasException;
+import com.mediadriver.atlas.mxbean.v2.AtlasContextFactoryMXBean;
+import com.mediadriver.atlas.spi.v2.AtlasModule;
+import com.mediadriver.atlas.spi.v2.AtlasModuleDetail;
+import com.mediadriver.atlas.spi.v2.AtlasModuleInfo;
+import com.mediadriver.atlas.v2.AtlasMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import java.io.File;
+import java.lang.management.ManagementFactory;
+import java.lang.reflect.Constructor;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -27,23 +41,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
-
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-
-import java.io.File;
-import java.lang.management.ManagementFactory;
-import java.lang.reflect.Constructor;
-import java.net.URL;
-
-import com.mediadriver.atlas.api.v2.AtlasContext;
-import com.mediadriver.atlas.api.v2.AtlasContextFactory;
-import com.mediadriver.atlas.api.v2.AtlasException;
-import com.mediadriver.atlas.mxbean.v2.AtlasContextFactoryMXBean;
-import com.mediadriver.atlas.spi.v2.AtlasModule;
-import com.mediadriver.atlas.spi.v2.AtlasModuleDetail;
-import com.mediadriver.atlas.spi.v2.AtlasModuleInfo;
-import com.mediadriver.atlas.v2.AtlasMapping;
 
 public class DefaultAtlasContextFactory implements AtlasContextFactory, AtlasContextFactoryMXBean {
 

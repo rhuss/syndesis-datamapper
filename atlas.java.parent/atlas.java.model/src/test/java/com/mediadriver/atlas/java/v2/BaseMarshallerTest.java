@@ -15,35 +15,21 @@
  */
 package com.mediadriver.atlas.java.v2;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributes;
-
+import com.mediadriver.atlas.v2.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 
-import com.mediadriver.atlas.v2.AtlasMapping;
-import com.mediadriver.atlas.v2.AtlasModelFactory;
-import com.mediadriver.atlas.v2.Field;
-import com.mediadriver.atlas.v2.FieldActions;
-import com.mediadriver.atlas.v2.FieldMapping;
-import com.mediadriver.atlas.v2.FieldMappings;
-import com.mediadriver.atlas.v2.MapAction;
-import com.mediadriver.atlas.v2.MapFieldMapping;
-import com.mediadriver.atlas.v2.MappedField;
-import com.mediadriver.atlas.v2.MappedFields;
-import com.mediadriver.atlas.v2.SeparateFieldMapping;
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+
+import static org.junit.Assert.*;
 
 public abstract class BaseMarshallerTest {
 
@@ -132,7 +118,7 @@ public abstract class BaseMarshallerTest {
 		Field f1 = m1.getField();		
 		assertTrue(f1 instanceof JavaField);
 		assertEquals("foo", ((JavaField) f1).getName());
-		assertEquals("bar", ((JavaField) f1).getValue());
+		assertEquals("bar", f1.getValue());
 		assertNull(((JavaField) f1).getType());
 
 		MappedField m2 = fm.getOutputField();
@@ -143,7 +129,7 @@ public abstract class BaseMarshallerTest {
 		Field f2 = m2.getField();		
 		assertTrue(f2 instanceof JavaField);
 		assertEquals("woot", ((JavaField) f2).getName());
-		assertEquals("blerg", ((JavaField) f2).getValue());
+		assertEquals("blerg", f2.getValue());
 		assertNull(((JavaField) f2).getType());
 		
 	}
@@ -212,7 +198,7 @@ public abstract class BaseMarshallerTest {
 		Field f1 = m1.getField();		
 		assertTrue(f1 instanceof JavaField);
 		assertEquals("foo", ((JavaField) f1).getName());
-		assertEquals("bar", ((JavaField) f1).getValue());
+		assertEquals("bar", f1.getValue());
 		assertNull(((JavaField) f1).getType());
 
 		MappedFields mFields = sfm.getOutputFields(); 
@@ -224,7 +210,7 @@ public abstract class BaseMarshallerTest {
 		Field f2 = m2.getField();		
 		assertTrue(f2 instanceof JavaField);
 		assertEquals("woot", ((JavaField) f2).getName());
-		assertEquals("blerg", ((JavaField) f2).getValue());
+		assertEquals("blerg", f2.getValue());
 		assertNull(((JavaField) f2).getType());
 		
 		MappedField m3 = mFields.getMappedField().get(1);
@@ -235,8 +221,53 @@ public abstract class BaseMarshallerTest {
 		Field f3 = m3.getField();		
 		assertTrue(f3 instanceof JavaField);
 		assertEquals("meow", ((JavaField) f3).getName());
-		assertEquals("ruff", ((JavaField) f3).getValue());
+		assertEquals("ruff", f3.getValue());
 		assertNull(((JavaField) f3).getType());
+	
+	}
+	
+	public MavenClasspathRequest generateMavenClasspathRequest() {
+		MavenClasspathRequest mavenClasspathRequest = new MavenClasspathRequest();
+		mavenClasspathRequest.setExecuteTimeout(30000L);
+		mavenClasspathRequest.setPomXmlData(generatePomXmlAsString());
+		return mavenClasspathRequest;
+	}
 		
+	public ClassInspectionRequest generateClassInspectionRequest() {
+		ClassInspectionRequest classInspectionRequest = new ClassInspectionRequest();
+		classInspectionRequest.setClasspath("/Users/mattrpav/.m2/repository/org/twitter4j/twitter4j-core/4.0.5/twitter4j-core-4.0.5.jar");
+		classInspectionRequest.setClassName("twitter4j.StatusJSONImpl");
+		classInspectionRequest.setFieldNameBlacklist(new StringList());
+		classInspectionRequest.getFieldNameBlacklist().getString().add("createdAt");
+		return classInspectionRequest;
+	}
+	
+	public String generatePomXmlAsString() {
+		return new String(
+				 "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">"
+				+ "	<modelVersion>4.0.0</modelVersion>"
+				+ "	<groupId>foo.bar</groupId>"
+				+ "	<artifactId>test.model</artifactId>"
+				+ "	<version>1.10.0</version>"
+				+ "	<packaging>jar</packaging>"
+				+ "	<name>Test :: Model</name>"
+				+ "	<dependencies>"
+				+ "		<dependency>"
+				+ "			<groupId>com.fasterxml.jackson.core</groupId>"
+				+ "			<artifactId>jackson-annotations</artifactId>"
+				+ "			<version>2.8.5</version>"
+				+ "		</dependency>"
+				+ "		<dependency>"
+				+ "			<groupId>com.fasterxml.jackson.core</groupId>"
+				+ "			<artifactId>jackson-databind</artifactId>"
+				+ "			<version>2.8.5</version>"
+				+ "		</dependency>"
+				+ "		<dependency>"
+				+ "			<groupId>com.fasterxml.jackson.core</groupId>"
+				+ "			<artifactId>jackson-core</artifactId>"
+				+ "			<version>2.8.5</version>"
+				+ "		</dependency>"
+				+ "	</dependencies>"
+				+ "</project>");
 	}
 }

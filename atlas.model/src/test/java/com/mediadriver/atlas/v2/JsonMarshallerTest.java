@@ -15,16 +15,21 @@
  */
 package com.mediadriver.atlas.v2;
 
-import static org.junit.Assert.*;
-
-import java.io.File;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.File;
+
+import javax.xml.bind.JAXBElement;
+import javax.xml.transform.stream.StreamSource;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class JsonMarshallerTest extends BaseMarshallerTest {
 
@@ -58,6 +63,22 @@ public class JsonMarshallerTest extends BaseMarshallerTest {
 		AtlasMapping uMapping = mapper.readValue(new File("src/test/resources/json/mockfield/atlasmapping.json"), AtlasMapping.class);
 		assertNotNull(uMapping);
 		validateAtlasMapping(uMapping);
+	}
+	
+	@Test
+	public void testJsonLookupTable() throws Exception {
+		AtlasMapping atlasMapping = generateAtlasMapping();
+		atlasMapping.getLookupTables().getLookupTable().add(generateLookupTable());
+		mapper.writeValue(new File("target" + File.separator + "junit" + File.separator + testName.getMethodName() + File.separator + "atlasmapping.json"), atlasMapping);
+		AtlasMapping uMapping = mapper.readValue(new File("src/test/resources/json/mockfield/atlasmapping-lookup.json"), AtlasMapping.class);
+		assertNotNull(uMapping);
+		validateAtlasMapping(uMapping);		
+		assertNotNull(uMapping.getLookupTables());
+		assertNotNull(uMapping.getLookupTables().getLookupTable());
+		assertEquals(new Integer(1), new Integer(uMapping.getLookupTables().getLookupTable().size()));
+		assertNotNull(uMapping.getLookupTables().getLookupTable().get(0).getLookupEntryList());
+		assertNotNull(uMapping.getLookupTables().getLookupTable().get(0).getLookupEntryList().getLookupEntry());
+		assertEquals(new Integer(2), new Integer(uMapping.getLookupTables().getLookupTable().get(0).getLookupEntryList().getLookupEntry().size()));
 	}
 
 }

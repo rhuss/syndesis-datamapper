@@ -15,13 +15,13 @@
  */
 package com.mediadriver.atlas.core.v2;
 
+import com.mediadriver.atlas.api.v2.AtlasSession;
+import com.mediadriver.atlas.v2.AtlasMapping;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import com.mediadriver.atlas.api.v2.AtlasSession;
-import com.mediadriver.atlas.v2.AtlasMapping;
 
 public class DefaultAtlasSession implements AtlasSession {
 
@@ -34,9 +34,9 @@ public class DefaultAtlasSession implements AtlasSession {
 	public DefaultAtlasSession() { initialize(); }
 	
 	protected void initialize() { properties = new ConcurrentHashMap<String, Object>(); 
-								  data = new ArrayList<Map<String, Object>>(); };
-	
-	public AtlasMapping getAtlasMapping() { return atlasMapping; }
+								  data = new ArrayList<Map<String, Object>>(); }
+
+    public AtlasMapping getAtlasMapping() { return atlasMapping; }
 	public void setAtlasMapping(AtlasMapping atlasMapping) { this.atlasMapping = atlasMapping; }
 	@Override
 	public Object getInput() { return input; }

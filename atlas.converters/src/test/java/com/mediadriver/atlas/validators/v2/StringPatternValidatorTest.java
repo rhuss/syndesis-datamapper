@@ -15,13 +15,13 @@
  */
 package com.mediadriver.atlas.validators.v2;
 
+import com.mediadriver.atlas.validators.v2.core.AtlasMappingErrors;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Created by slepage on 3/12/17.
  */
 public class StringPatternValidatorTest {
 

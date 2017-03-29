@@ -15,21 +15,21 @@
  */
 package com.mediadriver.atlas.spi.v2;
 
-import java.util.List;
-
 import com.mediadriver.atlas.api.v2.AtlasException;
 import com.mediadriver.atlas.api.v2.AtlasSession;
 
+import java.util.List;
+
 public interface AtlasModule {
 
-	public void init();
-	public void destroy();
-	public void processInput(AtlasSession session) throws AtlasException;
-	public void processOutput(AtlasSession session) throws AtlasException;
-	public AtlasModuleMode getMode();
-	public void setMode(AtlasModuleMode atlasModuleMode);
-	public List<AtlasModuleMode> listSupportedModes();
-	public Boolean isStatisticsSupported();
-	public Boolean isStatisticsEnabled();
+	void init();
+	void destroy();
+	void processInput(AtlasSession session) throws AtlasException;
+	void processOutput(AtlasSession session) throws AtlasException;
+	AtlasModuleMode getMode();
+	void setMode(AtlasModuleMode atlasModuleMode);
+	List<AtlasModuleMode> listSupportedModes();
+	Boolean isStatisticsSupported();
+	Boolean isStatisticsEnabled();
 
 }

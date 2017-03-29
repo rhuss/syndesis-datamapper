@@ -15,13 +15,13 @@
  */
 package com.mediadriver.atlas.java.service.v2;
 
-import javax.ws.rs.ext.ContextResolver;
-import javax.ws.rs.ext.Provider;
-
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+
+import javax.ws.rs.ext.ContextResolver;
+import javax.ws.rs.ext.Provider;
 
 @Provider
 public class AtlasJsonProvider implements ContextResolver<ObjectMapper> {
@@ -34,7 +34,7 @@ public class AtlasJsonProvider implements ContextResolver<ObjectMapper> {
 		objectMapper.configure(DeserializationFeature.UNWRAP_ROOT_VALUE, true);
 		// Causes errors in serialization .. NPE in 
 		// FilteringJacksonJaxbJsonProvider.writeTo(FilteringJacksonJaxbJsonProvider.java:130)
-		//objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+		objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
 		objectMapper.setSerializationInclusion(Include.NON_NULL);	
 	}
 

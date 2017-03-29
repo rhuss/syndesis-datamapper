@@ -15,13 +15,14 @@
  */
 package com.mediadriver.atlas.validators.v2;
 
+import com.mediadriver.atlas.validators.v2.core.AtlasMappingError;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * Created by slepage on 3/14/17.
  */
 public class NotEmptyValidator implements Validator {
 
@@ -35,14 +36,12 @@ public class NotEmptyValidator implements Validator {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public boolean supports(Class clazz) {
 
-        if (clazz.isAssignableFrom(List.class) || clazz.isAssignableFrom(Map.class)
-                || clazz.isAssignableFrom(Set.class) || clazz.isAssignableFrom(Collection.class)) {
-            return true;
-        }
+        return clazz.isAssignableFrom(List.class) || clazz.isAssignableFrom(Map.class)
+                || clazz.isAssignableFrom(Set.class) || clazz.isAssignableFrom(Collection.class);
 
-        return false;
     }
 
     @Override

@@ -15,21 +15,19 @@
  */
 package com.mediadriver.atlas.java.v2;
 
-import static org.junit.Assert.*;
-
-import java.io.File;
+import com.mediadriver.atlas.v2.AtlasMapping;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
+import java.io.File;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import com.mediadriver.atlas.v2.AtlasMapping;
+import static org.junit.Assert.assertNotNull;
 
 public class XmlMarshallerTest extends BaseMarshallerTest {
 

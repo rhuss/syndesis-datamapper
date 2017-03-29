@@ -15,8 +15,9 @@
  */
 package com.mediadriver.atlas.validators.v2;
 
+import com.mediadriver.atlas.validators.v2.core.AtlasMappingError;
+
 /**
- * Created by slepage on 3/15/17.
  */
 public class PositiveIntegerValidator implements Validator {
 
@@ -33,11 +34,8 @@ public class PositiveIntegerValidator implements Validator {
     @Override
     public boolean supports(Class clazz) {
 
-        if (Integer.class.isAssignableFrom(clazz) || String.class.isAssignableFrom(clazz)) {
-            return true;
-        }
+        return Integer.class.isAssignableFrom(clazz) || String.class.isAssignableFrom(clazz);
 
-        return false;
     }
 
     @Override

@@ -15,21 +15,13 @@
  */
 package com.mediadriver.atlas.service.v2;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.nio.file.Paths;
+import com.mediadriver.atlas.v2.AtlasMapping;
+import com.mediadriver.atlas.v2.StringMap;
+import com.mediadriver.atlas.v2.StringMapEntry;
+import org.glassfish.jersey.jackson.JacksonFeature;
+import org.glassfish.jersey.server.ResourceConfig;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.OPTIONS;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -41,13 +33,9 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
-
-import org.glassfish.jersey.jackson.JacksonFeature;
-import org.glassfish.jersey.server.ResourceConfig;
-
-import com.mediadriver.atlas.v2.AtlasMapping;
-import com.mediadriver.atlas.v2.StringMap;
-import com.mediadriver.atlas.v2.StringMapEntry;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.nio.file.Paths;
 
 @ApplicationPath("/")
 @Path("v2/atlas")
@@ -108,11 +96,8 @@ public class AtlasService extends Application {
 				if (filter != null && name != null && !name.toLowerCase().contains(filter.toLowerCase())) {
 					return false;
 				}
-				if(name.matches("atlasmapping-[a-zA-Z0-9\\.\\-]+.xml")) {
-					return true;
-				}
-				return false;
-			}
+                return name.matches("atlasmapping-[a-zA-Z0-9\\.\\-]+.xml");
+            }
 		});
     	
     	if(mappings == null) {

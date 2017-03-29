@@ -15,8 +15,9 @@
  */
 package com.mediadriver.atlas.v2;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class AtlasModelFactoryTest {
 	
@@ -24,6 +25,8 @@ public class AtlasModelFactoryTest {
 	public void testCreateSeparateFieldMapping() {
 		SeparateFieldMapping fm = AtlasModelFactory.createFieldMapping(SeparateFieldMapping.class);
 		assertNotNull(fm);
+		assertNull(fm.getAlias());
+		assertNull(fm.getDescription());
 		assertNotNull(fm.getOutputFields());
 		assertNotNull(fm.getOutputFields().getMappedField());
 		assertNull(fm.getInputField());
@@ -34,6 +37,8 @@ public class AtlasModelFactoryTest {
 	public void testCreateMapFieldMapping() {
 		MapFieldMapping fm = AtlasModelFactory.createFieldMapping(MapFieldMapping.class);
 		assertNotNull(fm);
+		assertNull(fm.getAlias());
+		assertNull(fm.getDescription());
 		assertNull(fm.getOutputField());
 		assertNull(fm.getInputField());
 	}
@@ -42,10 +47,23 @@ public class AtlasModelFactoryTest {
 	public void testCreateCombineFieldMapping() {
 		CombineFieldMapping fm = AtlasModelFactory.createFieldMapping(CombineFieldMapping.class);
 		assertNotNull(fm);
+		assertNull(fm.getAlias());
+		assertNull(fm.getDescription());
 		assertNotNull(fm.getInputFields());
 		assertNotNull(fm.getInputFields().getMappedField());
 		assertNull(fm.getOutputField());
 		assertEquals(new Integer(0), new Integer(fm.getInputFields().getMappedField().size()));
+	}
+	
+	@Test
+	public void testCreateLookupFieldMapping() {
+		LookupFieldMapping fm = AtlasModelFactory.createFieldMapping(LookupFieldMapping.class);
+		assertNotNull(fm);
+		assertNull(fm.getInputField());
+		assertNull(fm.getOutputField());
+		assertNull(fm.getAlias());
+		assertNull(fm.getDescription());
+		assertNull(fm.getLookupTableName());
 	}
 
 }

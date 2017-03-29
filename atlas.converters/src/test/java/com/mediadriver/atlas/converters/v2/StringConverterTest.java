@@ -74,8 +74,7 @@ public class StringConverterTest {
 
     @Test
     public void convertToBoolean_Null() throws Exception {
-        String s = null;
-        Boolean b = converter.convertToBoolean(s);
+        Boolean b = converter.convertToBoolean(null);
         assertNull(b);
     }
 
@@ -106,8 +105,7 @@ public class StringConverterTest {
 
     @Test
     public void convertToCharacter_Null() throws Exception {
-        String s = null;
-        Character c = converter.convertToCharacter(s);
+        Character c = converter.convertToCharacter(null);
         assertNull(c);
     }
 
@@ -135,8 +133,7 @@ public class StringConverterTest {
 
     @Test
     public void convertToDouble_Null() throws Exception {
-        String s = null;
-        Double d = converter.convertToDouble(s);
+        Double d = converter.convertToDouble(null);
         assertNull(d);
     }
 
@@ -232,8 +229,7 @@ public class StringConverterTest {
 
     @Test
     public void convertToInteger_Null() throws Exception {
-        String s = null;
-        Integer i = converter.convertToInteger(s);
+        Integer i = converter.convertToInteger(null);
         assertNull(i);
     }
 
@@ -245,7 +241,6 @@ public class StringConverterTest {
 
     @Test(expected = AtlasConversionException.class)
     public void convertToInteger_GreaterThanMAX() throws Exception {
-        System.out.println(Integer.MAX_VALUE);
         String s = "214748364755545422145221";
         Integer i = converter.convertToInteger(s);
     }
@@ -261,13 +256,12 @@ public class StringConverterTest {
         String s = "1";
         Long l = converter.convertToLong(s);
         assertNotNull(l);
-        assertEquals(1, l.longValue(), 0.0);
+        assertEquals(1, l, 0.0);
     }
 
     @Test
     public void convertToLong_Null() throws Exception {
-        String s = null;
-        Long l = converter.convertToLong(s);
+        Long l = converter.convertToLong(null);
         assertNull(l);
     }
 
@@ -315,8 +309,7 @@ public class StringConverterTest {
 
     @Test
     public void convertToShort_Null() throws Exception {
-        String aString = null;
-        Short s = converter.convertToShort(aString);
+        Short s = converter.convertToShort(null);
         assertNull(s);
     }
 
@@ -338,8 +331,7 @@ public class StringConverterTest {
 
     @Test
     public void convertToString_Null() throws Exception {
-        String aString = null;
-        String s = converter.convertToString(aString);
+        String s = converter.convertToString(null);
         assertNull(s);
     }
 

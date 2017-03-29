@@ -15,23 +15,20 @@
  */
 package com.mediadriver.atlas.v2;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributes;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestName;
+
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+
+import static org.junit.Assert.*;
 
 public abstract class BaseMarshallerTest {
 
@@ -74,9 +71,31 @@ public abstract class BaseMarshallerTest {
 			});
 		}
 	}
+	
+	protected LookupTable generateLookupTable() {
+		LookupTable lookupTable = AtlasModelFactory.createLookupTable();
+		lookupTable.setName("junit-lookuptable");
+		lookupTable.setDescription("Sample lookup table entry for reference");
+		
+		LookupEntry entry1 = new LookupEntry();
+		entry1.setSourceType(FieldType.STRING);
+		entry1.setSourceValue("foo");
+		entry1.setTargetType(FieldType.STRING);
+		entry1.setTargetValue("bar");
+		
+		LookupEntry entry2 = new LookupEntry();
+		entry2.setSourceType(FieldType.STRING);
+		entry2.setSourceValue("blah");
+		entry2.setTargetType(FieldType.STRING);
+		entry2.setTargetValue("blur");
+		
+		lookupTable.getLookupEntryList().getLookupEntry().add(entry1);
+		lookupTable.getLookupEntryList().getLookupEntry().add(entry2);
+		return lookupTable;
+	}
 
 	protected AtlasMapping generateAtlasMapping() {
-		AtlasMapping mapping = new AtlasMapping();
+		AtlasMapping mapping = AtlasModelFactory.createAtlasMapping();
 		mapping.setName("junit");
 		mapping.setFieldMappings(new FieldMappings());
 
@@ -106,7 +125,7 @@ public abstract class BaseMarshallerTest {
 		assertEquals("junit", mapping.getName());
 		assertNotNull(mapping.getFieldMappings());
 		assertEquals(new Integer(1), new Integer(mapping.getFieldMappings().getFieldMapping().size()));
-		assertNull(mapping.getProperties());
+		assertNotNull(mapping.getProperties());
 
 		MapFieldMapping fm = (MapFieldMapping)mapping.getFieldMappings().getFieldMapping().get(0);
 		assertNotNull(fm);
@@ -120,7 +139,7 @@ public abstract class BaseMarshallerTest {
 		Field f1 = m1.getField();		
 		assertTrue(f1 instanceof MockField);
 		assertEquals("foo", ((MockField) f1).getName());
-		assertEquals("bar", ((MockField) f1).getValue());
+		assertEquals("bar", f1.getValue());
 		assertNull(((MockField) f1).getType());
 
 		MappedField m2 = fm.getOutputField();
@@ -131,7 +150,7 @@ public abstract class BaseMarshallerTest {
 		Field f2 = m2.getField();		
 		assertTrue(f2 instanceof MockField);
 		assertEquals("woot", ((MockField) f2).getName());
-		assertEquals("blerg", ((MockField) f2).getValue());
+		assertEquals("blerg", f2.getValue());
 		assertNull(((MockField) f2).getType());
 		
 	}

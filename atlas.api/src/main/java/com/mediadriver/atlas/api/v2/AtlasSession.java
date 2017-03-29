@@ -15,20 +15,21 @@
  */
 package com.mediadriver.atlas.api.v2;
 
+import com.mediadriver.atlas.v2.AtlasMapping;
+
 import java.util.List;
 import java.util.Map;
-import com.mediadriver.atlas.v2.AtlasMapping;
 
 public interface AtlasSession {
 
-	public Map<String, Object> getProperties();
-	public AtlasMapping getAtlasMapping();
-	public void setAtlasMapping(AtlasMapping atlasMapping);
-	public Object getInput();
-	public void setInput(Object inputObject);
-	public Object getOutput();
-	public void setOutput(Object outputObject);
-	public List<Map<String, Object>> getData();
-	public void setData(List<Map<String, Object>> data);
+	Map<String, Object> getProperties();
+	AtlasMapping getAtlasMapping();
+	void setAtlasMapping(AtlasMapping atlasMapping);
+	Object getInput();
+	void setInput(Object inputObject);
+	Object getOutput();
+	void setOutput(Object outputObject);
+	List<Map<String, Object>> getData();
+	void setData(List<Map<String, Object>> data);
 	
 }

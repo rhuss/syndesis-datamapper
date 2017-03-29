@@ -15,7 +15,10 @@
  */
 package com.mediadriver.atlas.java.inspect.v2;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
+import org.xeustechnologies.jcl.JarClassLoader;
+import org.xeustechnologies.jcl.exception.JclException;
+
 import java.io.FileInputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -26,8 +29,7 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
-import org.junit.Test;
-import org.xeustechnologies.jcl.JarClassLoader;
+import static org.junit.Assert.*;
 
 public class DynamicClassLoaderTest {
 
@@ -96,6 +98,27 @@ public class DynamicClassLoaderTest {
         	fail("ClassNotFoundException expected");
 		} catch (ClassNotFoundException e) {
 			// Expected
+		}
+	}
+	
+	@Test
+	public void testLoadUnloadNeverLoadedClass() throws Exception {
+		
+		Class<?> flatClazz = null;
+		
+		try {
+			flatClazz = this.getClass().getClassLoader().loadClass("com.mediadriver.atlas.java.test.v2.FlatPrimitiveClass");
+        	fail("ClassNotFoundException expected");
+		} catch (ClassNotFoundException e) {
+			// Expected
+		}
+		
+		JarClassLoader jc = new JarClassLoader( new String[] { "target/reference-jars" } );
+		
+		try { 
+			jc.unloadClass("com.mediadriver.atlas.java.test.v2.FlatPrimitiveClass44");
+		} catch (JclException e) {
+			assertEquals("Resource not found in local ClasspathResources", e.getCause().getMessage());
 		}
 	}
 

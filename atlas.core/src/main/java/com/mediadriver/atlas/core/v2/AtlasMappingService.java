@@ -15,13 +15,10 @@
  */
 package com.mediadriver.atlas.core.v2;
 
-import java.io.File;
-import java.io.Serializable;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import com.mediadriver.atlas.api.v2.AtlasValidationException;
+import com.mediadriver.atlas.v2.AtlasMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -29,12 +26,13 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.mediadriver.atlas.api.v2.AtlasValidationException;
-import com.mediadriver.atlas.v2.AtlasMapping;
+import java.io.File;
+import java.io.Serializable;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AtlasMappingService implements Serializable {
 
@@ -84,7 +82,7 @@ public class AtlasMappingService implements Serializable {
 	public AtlasMapping loadMapping(String fileName) throws AtlasValidationException {
 		try {
 			StreamSource fileSource = new StreamSource(new File(fileName));
-			AtlasMapping atlasMapping = ((JAXBElement<AtlasMapping>)unmarshaller.unmarshal(fileSource, AtlasMapping.class)).getValue();
+			AtlasMapping atlasMapping = unmarshaller.unmarshal(fileSource, AtlasMapping.class).getValue();
 			validate(atlasMapping);
 			return atlasMapping;
 		} catch (JAXBException e) {
@@ -95,7 +93,7 @@ public class AtlasMappingService implements Serializable {
 	public AtlasMapping loadMapping(File file) throws AtlasValidationException {
 		try {
 			StreamSource fileSource = new StreamSource(file);
-			AtlasMapping atlasMapping = ((JAXBElement<AtlasMapping>)unmarshaller.unmarshal(fileSource, AtlasMapping.class)).getValue();
+			AtlasMapping atlasMapping = unmarshaller.unmarshal(fileSource, AtlasMapping.class).getValue();
 			validate(atlasMapping);
 			return atlasMapping;
 		} catch (JAXBException e) {
@@ -106,7 +104,7 @@ public class AtlasMappingService implements Serializable {
 	public AtlasMapping loadMapping(URI uri) throws AtlasValidationException {
 		try {
 			StreamSource fileSource = new StreamSource(new File(uri));
-			AtlasMapping atlasMapping = ((JAXBElement<AtlasMapping>)unmarshaller.unmarshal(fileSource, AtlasMapping.class)).getValue();
+			AtlasMapping atlasMapping = unmarshaller.unmarshal(fileSource, AtlasMapping.class).getValue();
 			validate(atlasMapping);
 			return atlasMapping;
 		} catch (JAXBException e) {
@@ -117,7 +115,7 @@ public class AtlasMappingService implements Serializable {
 	public AtlasMapping loadMapping(URL url) throws AtlasValidationException {
 		try {
 			StreamSource fileSource = new StreamSource(new File(url.toURI()));
-			AtlasMapping atlasMapping = ((JAXBElement<AtlasMapping>)unmarshaller.unmarshal(fileSource, AtlasMapping.class)).getValue();
+			AtlasMapping atlasMapping = unmarshaller.unmarshal(fileSource, AtlasMapping.class).getValue();
 			validate(atlasMapping);
 			return atlasMapping;
 		} catch (JAXBException e) {

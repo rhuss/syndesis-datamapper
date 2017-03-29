@@ -15,25 +15,39 @@
  */
 package com.mediadriver.atlas.java.inspect.v2;
 
-import static org.junit.Assert.*;
-import org.junit.Test;
-
 import com.mediadriver.atlas.java.test.v2.TestOrder;
 import com.mediadriver.atlas.java.v2.AtlasJavaModelFactory;
 import com.mediadriver.atlas.java.v2.JavaClass;
 import com.mediadriver.atlas.java.v2.JavaField;
 import com.mediadriver.atlas.v2.FieldStatus;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+import org.junit.After;
+import org.junit.Before;
 
 public class ComplexClassInspectTest {
 
+	private ClassInspectionService classInspectionService = null;
+	
+	@Before
+	public void setUp() {
+		classInspectionService = new ClassInspectionService();
+	}
+	
+	@After
+	public void tearDown() {
+		classInspectionService = null;
+	}
+	
 	@Test
 	public void testComplexClass() throws Exception {
-		JavaClass c = ClassInspector.inspectClass(TestOrder.class);
+		JavaClass c = classInspectionService.inspectClass(TestOrder.class);
 		assertNotNull(c);
 		assertNull(c.getAnnotations());
 		assertNull(c.getArrayDimensions());
-		assertEquals("TestOrder", c.getClassName());
-		assertEquals("com.mediadriver.atlas.java.test.v2.TestOrder", c.getFullyQualifiedName());
+		assertEquals("com.mediadriver.atlas.java.test.v2.TestOrder", c.getClassName());
 		assertNull(c.getGetMethod());
 		assertNotNull(c.getJavaEnumFields());
 		assertNotNull(c.getJavaEnumFields().getJavaEnumField());

@@ -15,13 +15,14 @@
  */
 package com.mediadriver.atlas.validators.v2;
 
+import com.mediadriver.atlas.validators.v2.core.AtlasMappingError;
+import com.mediadriver.atlas.validators.v2.core.AtlasMappingErrors;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 /**
- * Created by slepage on 3/14/17.
  */
 public class StringLengthValidatorTest {
 

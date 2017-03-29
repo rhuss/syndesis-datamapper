@@ -15,12 +15,13 @@
  */
 package com.mediadriver.atlas.mock.module.v2;
 
-import java.util.List;
 import com.mediadriver.atlas.api.v2.AtlasException;
 import com.mediadriver.atlas.api.v2.AtlasSession;
 import com.mediadriver.atlas.spi.v2.AtlasModule;
 import com.mediadriver.atlas.spi.v2.AtlasModuleDetail;
 import com.mediadriver.atlas.spi.v2.AtlasModuleMode;
+
+import java.util.List;
 
 @AtlasModuleDetail(name="MockModule", uri="atlas:mock", modes={"SOURCE", "TARGET"}, dataFormats={"mock"}, configPackages={"com.mediadriver.atlas.v2"})
 public class MockModule implements AtlasModule {

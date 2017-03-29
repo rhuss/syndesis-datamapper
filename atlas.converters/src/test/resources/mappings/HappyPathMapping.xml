@@ -4,22 +4,22 @@
     <FieldMappings>
         <FieldMapping xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="MapFieldMapping">
             <InputField>
-                <Field xsi:type="ns2:JavaField" className="com.qwerty.MyClass" type="String"/>
+                <Field xsi:type="ns2:JavaField" name="inputName" className="java.lang.String" type="String"/>
                 <FieldActions/>
             </InputField>
             <OutputField>
-                <Field xsi:type="ns2:JavaField" type="Boolean"/>
+                <Field xsi:type="ns2:JavaField" name="outputName" className="java.lang.String" type="String"/>
                 <FieldActions/>
             </OutputField>
         </FieldMapping>
         <FieldMapping xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="SeparateFieldMapping">
             <InputField>
-                <Field xsi:type="ns2:JavaField" className="org.example.OtherValueObject" type="Boolean"/>
+                <Field xsi:type="ns2:JavaField" name="inputName" className="java.lang.String" type="String"/>
                 <FieldActions/>
             </InputField>
             <OutputFields>
                 <MappedField>
-                    <Field xsi:type="ns2:JavaField" className="com.example.ValueObject" type="String"/>
+                    <Field xsi:type="ns2:JavaField" name="outputName" className="java.lang.String" type="String"/>
                     <FieldActions>
                         <FieldAction xsi:type="MapAction" index="0"/>
                     </FieldActions>

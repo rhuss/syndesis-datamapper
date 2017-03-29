@@ -15,10 +15,23 @@
  */
 package com.mediadriver.atlas.java.inspect.v2;
 
+import com.mediadriver.atlas.java.v2.AtlasJavaModelFactory;
+import com.mediadriver.atlas.java.v2.JavaClass;
+import com.mediadriver.atlas.java.v2.JavaEnumField;
+import com.mediadriver.atlas.java.v2.JavaField;
+import com.mediadriver.atlas.v2.AtlasModelFactory;
+import com.mediadriver.atlas.v2.FieldStatus;
+import com.mediadriver.atlas.v2.FieldType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xeustechnologies.jcl.JarClassLoader;
+import org.xeustechnologies.jcl.exception.JclException;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,36 +40,79 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.mediadriver.atlas.java.v2.JavaClass;
-import com.mediadriver.atlas.java.v2.JavaEnumField;
-import com.mediadriver.atlas.java.v2.JavaField;
-import com.mediadriver.atlas.java.v2.AtlasJavaModelFactory;
-import com.mediadriver.atlas.v2.AtlasModelFactory;
-import com.mediadriver.atlas.v2.FieldStatus;
-import com.mediadriver.atlas.v2.FieldType;
-
-public class ClassInspector implements Serializable {
+public class ClassInspectionService implements Serializable {
 	
 	private static final long serialVersionUID = 6634950157813704038L;
-	private static final Logger logger = LoggerFactory.getLogger(ClassInspector.class);
+	private static final Logger logger = LoggerFactory.getLogger(ClassInspectionService.class);
 	public static final int MAX_REENTRY_LIMIT = 1;
 	public static final int MAX_ARRAY_DIM_LIMIT = 256; // JVM specification limit
 
-	public static final Set<String> primitiveClasses = new HashSet<String>(Arrays.asList("byte", "short", "int", "long", "float", "double", "boolean", "char"));
-	public static final Set<String> boxedPrimitiveClasses = new HashSet<String>(Arrays.asList("java.lang.Byte", "java.lang.Short", "java.lang.Integer", "java.lang.Long", "java.lang.Float", "java.lang.Double", "java.lang.Boolean", "java.lang.Character", "java.lang.String"));
+	private List<String> primitiveClasses = new ArrayList<String>(Arrays.asList("byte", "short", "int", "long", "float", "double", "boolean", "char"));
+	private List<String> boxedPrimitiveClasses = new ArrayList<String>(Arrays.asList("java.lang.Byte", "java.lang.Short", "java.lang.Integer", "java.lang.Long", "java.lang.Float", "java.lang.Double", "java.lang.Boolean", "java.lang.Character", "java.lang.String"));
+	private List<String> fieldBlacklist = new ArrayList<String>(Arrays.asList("serialVersionUID"));
+	private List<String> classNameBlacklist = new ArrayList<String>();
+	private Boolean disableProtectedOnlyFields = false;
+	private Boolean disablePrivateOnlyFields = false;
+	private Boolean disablePublicOnlyFields = false;
+	private Boolean disablePublicGetterSetterFields = false;
 	
-	public static Map<String, JavaClass> inspectPackage(String packageName) throws ClassNotFoundException, InspectionException {
+	public List<String> getPrimitiveClasses() {
+		return this.primitiveClasses;
+	}
+	
+	public List<String> getBoxedPrimitiveClasses() {
+		return this.boxedPrimitiveClasses;
+	}
+	
+	public List<String> getClassNameBlacklist() {
+		return this.classNameBlacklist;
+	}
+	
+	public List<String> getFieldBlacklist() {
+		return this.fieldBlacklist;
+	}
+
+	public Boolean getDisableProtectedOnlyFields() {
+		return disableProtectedOnlyFields;
+	}
+
+	public void setDisableProtectedOnlyFields(Boolean disableProtectedOnlyFields) {
+		this.disableProtectedOnlyFields = disableProtectedOnlyFields;
+	}
+
+	public Boolean getDisablePrivateOnlyFields() {
+		return disablePrivateOnlyFields;
+	}
+
+	public void setDisablePrivateOnlyFields(Boolean disablePrivateOnlyFields) {
+		this.disablePrivateOnlyFields = disablePrivateOnlyFields;
+	}
+
+	public Boolean getDisablePublicOnlyFields() {
+		return disablePublicOnlyFields;
+	}
+
+	public void setDisablePublicOnlyFields(Boolean disablePublicOnlyFields) {
+		this.disablePublicOnlyFields = disablePublicOnlyFields;
+	}
+
+	public Boolean getDisablePublicGetterSetterFields() {
+		return disablePublicGetterSetterFields;
+	}
+
+	public void setDisablePublicGetterSetterFields(Boolean disablePublicGetterSetterFields) {
+		this.disablePublicGetterSetterFields = disablePublicGetterSetterFields;
+	}
+
+	public Map<String, JavaClass> inspectPackage(String packageName) throws ClassNotFoundException, InspectionException {
 		return inspectPackages(Arrays.asList(packageName), false);
 	}
 	
-	public static Map<String, JavaClass> inspectPackages(String packageName, boolean inspectChildren) throws ClassNotFoundException, InspectionException {
+	public Map<String, JavaClass> inspectPackages(String packageName, boolean inspectChildren) throws ClassNotFoundException, InspectionException {
 		return inspectPackages(Arrays.asList(packageName), inspectChildren);
 	}
 	
-	public static Map<String, JavaClass> inspectPackages(List<String> packages, boolean inspectChildren) throws ClassNotFoundException, InspectionException {
+	public Map<String, JavaClass> inspectPackages(List<String> packages, boolean inspectChildren) throws ClassNotFoundException, InspectionException {
 		packages = inspectChildren ? findChildPackages(packages) : packages;
 		Map<String, JavaClass> classes = new HashMap<>();
 		for (String p : packages) {
@@ -65,7 +121,7 @@ public class ClassInspector implements Serializable {
 		return classes;
 	}
 	
-	public static List<String> findClassesForPackage(String packageName) {		
+	public List<String> findClassesForPackage(String packageName) {		
 		List<String> classNames = new LinkedList<>();
 		List<Class<?>> classes = ClassFinder.find(packageName);
 		if (classes != null) {
@@ -76,7 +132,7 @@ public class ClassInspector implements Serializable {
 		return classNames;
 	}
 	
-	public static List<String> findChildPackages(List<String> packages) {
+	public List<String> findChildPackages(List<String> packages) {
 		List<String> foundPackages = new LinkedList<>();
 		for (String p : packages) {
 			foundPackages.addAll(findChildPackages(p));
@@ -84,7 +140,7 @@ public class ClassInspector implements Serializable {
 		return foundPackages;
 	}
 	
-	public static List<String> findChildPackages(String packageName) {
+	public List<String> findChildPackages(String packageName) {
 		List<String> packageNames = new LinkedList<>();
 		Package originalPackage = Package.getPackage(packageName);
 		Package[] allPackages = Package.getPackages();
@@ -98,16 +154,16 @@ public class ClassInspector implements Serializable {
 		return packageNames;
 	}		
 	
-	public static Map<String,JavaClass> inspectClasses(List<String> classNames) {
+	public Map<String,JavaClass> inspectClasses(List<String> classNames) {
 		Map<String,JavaClass> classes = new HashMap<>();
 		for (String c : classNames) {
 			JavaClass d = inspectClass(c);
-			classes.put(d.getFullyQualifiedName(), d);
+			classes.put(d.getClassName(), d);
 		}
 		return classes;
 	}
 
-	public static JavaClass inspectClass(String className) {
+	public JavaClass inspectClass(String className) {
 		JavaClass d = null;
 		Class<?> clazz = null;
 		try {
@@ -115,13 +171,47 @@ public class ClassInspector implements Serializable {
 			d = inspectClass(clazz);
 		} catch (ClassNotFoundException cnfe) {
 			d = AtlasJavaModelFactory.createJavaClass();
-			d.setFullyQualifiedName(className);
+			d.setClassName(className);
 			d.setStatus(FieldStatus.NOT_FOUND);
 		}
 		return d;
 	}
 	
-	public static JavaClass inspectClass(Class<?> clazz) {
+	public JavaClass inspectClass(String className, String classpath) throws InspectionException {
+		
+		if(className == null || classpath == null) {
+			throw new InspectionException("ClassName and Classpath must be specified");
+		}
+		
+		JavaClass d = null;
+		Class<?> clazz = null;
+		JarClassLoader jcl = null;
+		try {
+			jcl = new JarClassLoader( new String[] { "target/reference-jars" } );
+			clazz = jcl.loadClass(className);
+			d = inspectClass(clazz);
+		} catch (ClassNotFoundException cnfe) {
+			d = AtlasJavaModelFactory.createJavaClass();
+			d.setClassName(className);
+			d.setStatus(FieldStatus.NOT_FOUND);
+		} finally {
+			if(jcl != null) {
+				try {
+					jcl.unloadClass(className);
+				} catch (JclException e) {
+					if(e.getCause() != null) {
+						logger.warn("Error unloading class " + className + " msg: " + e.getCause().getMessage(), e.getCause());
+					} else {
+						logger.warn("Error unloading class " + className + " msg: " + e.getMessage(), e);
+					}
+				}
+			}
+			jcl = null;
+		}
+		return d;
+	}
+	
+	public JavaClass inspectClass(Class<?> clazz) {
 		if(clazz == null) {
 			throw new IllegalArgumentException("Class must be specified");
 		}
@@ -131,7 +221,7 @@ public class ClassInspector implements Serializable {
 		return javaClass;
 	}
 		
-	protected static void inspectClass(Class<?> clazz, JavaClass javaClass, Set<String> cachedClasses) {
+	protected void inspectClass(Class<?> clazz, JavaClass javaClass, Set<String> cachedClasses) {
 
 		Class<?> clz = clazz;
 		if(clazz.isArray()) {
@@ -145,9 +235,8 @@ public class ClassInspector implements Serializable {
 			clz = clazz;
 		}
 		
-		javaClass.setClassName(clz.getSimpleName());
+		javaClass.setClassName(clz.getCanonicalName());
 		javaClass.setPackageName((clz.getPackage() != null ? clz.getPackage().getName() : null));
-		javaClass.setFullyQualifiedName(clz.getCanonicalName());	
 		javaClass.setAnnotation(clz.isAnnotation());
 		javaClass.setAnnonymous(clz.isAnonymousClass());
 		javaClass.setEnumeration(clz.isEnum());
@@ -162,13 +251,28 @@ public class ClassInspector implements Serializable {
 		}
 			
 		Field[] fields = clz.getDeclaredFields();
-		if (fields != null) {
+		if (fields != null && !javaClass.isEnumeration()) {
 			for (Field f : fields) {
 				if (Enum.class.isAssignableFrom(f.getType())) {
 					continue;
 				}
 				JavaField s = inspectField(f, cachedClasses);
-				javaClass.getJavaFields().getJavaField().add(s);
+				
+				if(getFieldBlacklist().contains(f.getName())) {
+					s.setStatus(FieldStatus.BLACK_LIST);
+				}
+				
+				if(s.getGetMethod() == null && s.getSetMethod() == null) {
+					if(s.getModifiers().getModifier().contains(com.mediadriver.atlas.java.v2.Modifier.PRIVATE) && !getDisablePrivateOnlyFields()) {
+						javaClass.getJavaFields().getJavaField().add(s);
+					} else if(s.getModifiers().getModifier().contains(com.mediadriver.atlas.java.v2.Modifier.PROTECTED) && !getDisableProtectedOnlyFields()) {
+						javaClass.getJavaFields().getJavaField().add(s);
+					} else if(s.getModifiers().getModifier().contains(com.mediadriver.atlas.java.v2.Modifier.PUBLIC) && !getDisablePublicOnlyFields()) {
+						javaClass.getJavaFields().getJavaField().add(s);
+					}
+				} else if(!getDisablePublicGetterSetterFields()) {
+					javaClass.getJavaFields().getJavaField().add(s);
+				}
 			}
 		}
 		
@@ -193,9 +297,9 @@ public class ClassInspector implements Serializable {
 		}
 		
 		Method[] methods = clz.getDeclaredMethods();
-		if (methods != null) {
+		if (methods != null && !javaClass.isEnumeration()) {
 			for (Method m : methods) {
-				JavaField s = new JavaField();
+				JavaField s = AtlasJavaModelFactory.createJavaField();
 				s.setName(m.getName());
 				s.setSynthetic(m.isSynthetic());
 				
@@ -217,7 +321,7 @@ public class ClassInspector implements Serializable {
 				
 				boolean found = false;
 				for(int i=0; i < javaClass.getJavaFields().getJavaField().size(); i++) {
-					JavaField exists = (JavaField)javaClass.getJavaFields().getJavaField().get(i);
+					JavaField exists = javaClass.getJavaFields().getJavaField().get(i);
 					if(s.getName().equals(exists.getName())) {
 						found = true;
 						
@@ -253,12 +357,12 @@ public class ClassInspector implements Serializable {
 		//return javaClass;
 	}
 	
-	protected static JavaField inspectGetMethod(Method m, JavaField s, Set<String> cachedClasses) {
+	protected JavaField inspectGetMethod(Method m, JavaField s, Set<String> cachedClasses) {
 		
 		s.setName(StringUtil.removeGetterAndLowercaseFirstLetter(m.getName()));
 
 		if(m.getParameterCount() != 0) {
-			s.setStatus(FieldStatus.UNSUPPORTED);;
+			s.setStatus(FieldStatus.UNSUPPORTED);
 			return s;
 		}
 		
@@ -315,12 +419,12 @@ public class ClassInspector implements Serializable {
 		return s;
 	}
 	
-	protected static JavaField inspectSetMethod(Method m, JavaField s, Set<String> cachedClasses) {
+	protected JavaField inspectSetMethod(Method m, JavaField s, Set<String> cachedClasses) {
 
 		s.setName(StringUtil.removeSetterAndLowercaseFirstLetter(m.getName()));
 
 		if(m.getParameterCount() != 1) {
-			s.setStatus(FieldStatus.UNSUPPORTED);;
+			s.setStatus(FieldStatus.UNSUPPORTED);
 			return s;
 		}
 		
@@ -383,9 +487,9 @@ public class ClassInspector implements Serializable {
 		return s;
 	}
 	
-	protected static JavaField inspectField(Field f, Set<String> cachedClasses) {
+	protected JavaField inspectField(Field f, Set<String> cachedClasses) {
 
-		JavaField s = new JavaField();
+		JavaField s = AtlasJavaModelFactory.createJavaField();
 		Class<?> clazz = f.getType();
 		
 		if(clazz.isArray()) {
@@ -441,6 +545,8 @@ public class ClassInspector implements Serializable {
 				s.getAnnotations().getString().add(a.annotationType().getCanonicalName());
 			}
 		}
+
+		s.getModifiers().getModifier().addAll(detectModifiers(f.getModifiers()));
 		
 		try {
 			String getterName = "get" + StringUtil.capitalizeFirstLetter(f.getName());			
@@ -474,15 +580,15 @@ public class ClassInspector implements Serializable {
 		return s;
 	}
 	
-	protected static boolean isFieldPrimitive(String fieldType) {
-		return primitiveClasses.contains(fieldType); 
+	protected boolean isFieldPrimitive(String fieldType) {
+		return getPrimitiveClasses().contains(fieldType); 
 	}
 	
-	protected static boolean isFieldBoxedPrimitive(String fieldType) {
-		return boxedPrimitiveClasses.contains(fieldType); 
+	protected boolean isFieldBoxedPrimitive(String fieldType) {
+		return getBoxedPrimitiveClasses().contains(fieldType); 
 	}
 	
-	protected static Integer detectArrayDimensions(Class<?> clazz) {
+	protected Integer detectArrayDimensions(Class<?> clazz) {
 		Integer arrayDim = new Integer(0);
 		if(clazz == null) {
 			return null;
@@ -502,7 +608,24 @@ public class ClassInspector implements Serializable {
 		return arrayDim;
 	}
 	
-	protected static Class<?> detectArrayClass(Class<?> clazz) {
+	protected List<com.mediadriver.atlas.java.v2.Modifier> detectModifiers(int m) {
+		List<com.mediadriver.atlas.java.v2.Modifier> modifiers = new ArrayList<com.mediadriver.atlas.java.v2.Modifier>();
+		if(Modifier.isAbstract(m)) { modifiers.add(com.mediadriver.atlas.java.v2.Modifier.ABSTRACT); }
+		if(Modifier.isFinal(m)) { modifiers.add(com.mediadriver.atlas.java.v2.Modifier.FINAL); }
+		if(Modifier.isInterface(m)) { modifiers.add(com.mediadriver.atlas.java.v2.Modifier.INTERFACE); }
+		if(Modifier.isNative(m)) { modifiers.add(com.mediadriver.atlas.java.v2.Modifier.NATIVE); }
+		if(Modifier.isPrivate(m)) { modifiers.add(com.mediadriver.atlas.java.v2.Modifier.PRIVATE); }
+		if(Modifier.isProtected(m)) { modifiers.add(com.mediadriver.atlas.java.v2.Modifier.PROTECTED); }
+		if(Modifier.isPublic(m)) { modifiers.add(com.mediadriver.atlas.java.v2.Modifier.PUBLIC); }
+		if(Modifier.isStatic(m)) { modifiers.add(com.mediadriver.atlas.java.v2.Modifier.STATIC); }
+		if(Modifier.isStrict(m)) { modifiers.add(com.mediadriver.atlas.java.v2.Modifier.STRICT); }
+		if(Modifier.isSynchronized(m)) { modifiers.add(com.mediadriver.atlas.java.v2.Modifier.SYNCHRONIZED); }
+		if(Modifier.isTransient(m)) { modifiers.add(com.mediadriver.atlas.java.v2.Modifier.TRANSIENT); }
+		if(Modifier.isVolatile(m)) { modifiers.add(com.mediadriver.atlas.java.v2.Modifier.VOLATILE); }
+		return modifiers;
+	}
+	
+	protected Class<?> detectArrayClass(Class<?> clazz) {
 		Integer arrayDim = new Integer(0);
 		if(clazz == null) {
 			return null;
@@ -522,7 +645,7 @@ public class ClassInspector implements Serializable {
 		return tmpClazz;
 	}
 	
-	protected static JavaClass convertJavaFieldToJavaClass(JavaField javaField) {
+	protected JavaClass convertJavaFieldToJavaClass(JavaField javaField) {
 		JavaClass javaClass = AtlasJavaModelFactory.createJavaClass();
 		javaClass.setArray(javaField.isArray());
 		javaClass.setArrayDimensions(javaField.getArrayDimensions());
@@ -539,7 +662,33 @@ public class ClassInspector implements Serializable {
 			javaClass.setUri(String.format(AtlasJavaModelFactory.URI_FORMAT, javaField.getClassName()));
 		}
 		javaClass.setValue(javaField.getValue());
-		
+		javaClass.setAnnotations(javaField.getAnnotations());
+		javaClass.setModifiers(javaField.getModifiers());
 		return javaClass;
+	}
+	
+	protected List<String> classpathStringToList(String classpath) {
+		if(classpath == null) {
+			return null;
+		}
+		
+		List<String> jars = new ArrayList<String>();
+		
+		if(classpath.isEmpty()) {
+			return jars;
+		}
+		
+		if(!classpath.contains(":")) {
+			jars.add(classpath);
+			return jars;
+		}
+
+		String[] items = classpath.split(":", 256);
+		if(items == null) {
+			return jars;
+		}
+		
+		jars.addAll(Arrays.asList(items));
+		return jars;
 	}
 }

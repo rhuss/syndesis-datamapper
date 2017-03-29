@@ -5,7 +5,6 @@
 package org.apache.camel.salesforce.dto;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
-import org.codehaus.jackson.annotate.JsonProperty;
 import org.apache.camel.component.salesforce.api.dto.AbstractSObjectBase;
 
 /**

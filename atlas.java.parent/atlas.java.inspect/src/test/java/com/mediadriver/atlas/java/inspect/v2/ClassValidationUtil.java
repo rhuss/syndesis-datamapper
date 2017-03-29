@@ -15,111 +15,96 @@
  */
 package com.mediadriver.atlas.java.inspect.v2;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import com.mediadriver.atlas.java.v2.AtlasJavaModelFactory;
 import com.mediadriver.atlas.java.v2.JavaClass;
 import com.mediadriver.atlas.java.v2.JavaField;
-import com.mediadriver.atlas.v2.Field;
 import com.mediadriver.atlas.v2.FieldStatus;
 import com.mediadriver.atlas.v2.FieldType;
 
+import static org.junit.Assert.*;
+
 public class ClassValidationUtil {
 	
-	public static void validateFlatPrimitiveClass(Class<?> clazz) throws Exception {
-		JavaClass flatClass = ClassInspector.inspectClass(clazz);
+	public static void validateFlatPrimitiveClass(ClassInspectionService classInspectionService, Class<?> clazz) throws Exception {
+		JavaClass flatClass = classInspectionService.inspectClass(clazz);
 		validateFlatClass(flatClass);
-		assertEquals("FlatPrimitiveClass", flatClass.getClassName());
 		assertFalse(flatClass.isArray());
 		assertEquals(null, flatClass.getArrayDimensions());
 		assertFalse(flatClass.isInterface());		
-		assertEquals("com.mediadriver.atlas.java.test.v2.FlatPrimitiveClass", flatClass.getFullyQualifiedName());
+		assertEquals("com.mediadriver.atlas.java.test.v2.FlatPrimitiveClass", flatClass.getClassName());
 		validateFlatPrimitiveFields(flatClass);
 	}
 	
-	public static void validateFlatPrimitiveClassArray(Class<?> clazz) throws Exception {
-		JavaClass flatClass = ClassInspector.inspectClass(clazz);
+	public static void validateFlatPrimitiveClassArray(ClassInspectionService classInspectionService, Class<?> clazz) throws Exception {
+		JavaClass flatClass = classInspectionService.inspectClass(clazz);
 		validateFlatClass(flatClass);
-		assertEquals("FlatPrimitiveClass", flatClass.getClassName());
 		assertTrue(flatClass.isArray());
 		assertEquals(new Integer(1), flatClass.getArrayDimensions());
 		assertFalse(flatClass.isInterface());
-		assertEquals("com.mediadriver.atlas.java.test.v2.FlatPrimitiveClass", flatClass.getFullyQualifiedName());
+		assertEquals("com.mediadriver.atlas.java.test.v2.FlatPrimitiveClass", flatClass.getClassName());
 		validateFlatPrimitiveFields(flatClass);
 	}
 	
-	public static void validateFlatPrimitiveClassTwoDimArray(Class<?> clazz) throws Exception {
-		JavaClass flatClass = ClassInspector.inspectClass(clazz);
+	public static void validateFlatPrimitiveClassTwoDimArray(ClassInspectionService classInspectionService, Class<?> clazz) throws Exception {
+		JavaClass flatClass = classInspectionService.inspectClass(clazz);
 		validateFlatClass(flatClass);
-		assertEquals("FlatPrimitiveClass", flatClass.getClassName());
 		assertTrue(flatClass.isArray());
 		assertEquals(new Integer(2), flatClass.getArrayDimensions());
 		assertFalse(flatClass.isInterface());
-		assertEquals("com.mediadriver.atlas.java.test.v2.FlatPrimitiveClass", flatClass.getFullyQualifiedName());
+		assertEquals("com.mediadriver.atlas.java.test.v2.FlatPrimitiveClass", flatClass.getClassName());
 		validateFlatPrimitiveFields(flatClass);
 	}
 	
-	public static void validateFlatPrimitiveClassThreeDimArray(Class<?> clazz) throws Exception {
-		JavaClass flatClass = ClassInspector.inspectClass(clazz);
+	public static void validateFlatPrimitiveClassThreeDimArray(ClassInspectionService classInspectionService, Class<?> clazz) throws Exception {
+		JavaClass flatClass = classInspectionService.inspectClass(clazz);
 		validateFlatClass(flatClass);
-		assertEquals("FlatPrimitiveClass", flatClass.getClassName());
 		assertTrue(flatClass.isArray());
 		assertEquals(new Integer(3), flatClass.getArrayDimensions());
 		assertFalse(flatClass.isInterface());
-		assertEquals("com.mediadriver.atlas.java.test.v2.FlatPrimitiveClass", flatClass.getFullyQualifiedName());
+		assertEquals("com.mediadriver.atlas.java.test.v2.FlatPrimitiveClass", flatClass.getClassName());
 		validateFlatPrimitiveFields(flatClass);
 	}
 	
-	public static void validateFlatPrimitiveInterface(Class<?> clazz) throws Exception {
-		JavaClass flatClass = ClassInspector.inspectClass(clazz);
+	public static void validateFlatPrimitiveInterface(ClassInspectionService classInspectionService, Class<?> clazz) throws Exception {
+		JavaClass flatClass = classInspectionService.inspectClass(clazz);
 		validateFlatClass(flatClass);
-		assertEquals("FlatPrimitiveInterface", flatClass.getClassName());
-		assertEquals("com.mediadriver.atlas.java.test.v2.FlatPrimitiveInterface", flatClass.getFullyQualifiedName());
+		assertEquals("com.mediadriver.atlas.java.test.v2.FlatPrimitiveInterface", flatClass.getClassName());
 		validateFlatPrimitiveFields(flatClass);
 	}
 	
-	public static void validateFlatPrimitiveInterfaceArray(Class<?> clazz) throws Exception {
-		JavaClass flatClass = ClassInspector.inspectClass(clazz);
+	public static void validateFlatPrimitiveInterfaceArray(ClassInspectionService classInspectionService, Class<?> clazz) throws Exception {
+		JavaClass flatClass = classInspectionService.inspectClass(clazz);
 		validateFlatClass(flatClass);
-		assertEquals("FlatPrimitiveInterface", flatClass.getClassName());
 		assertTrue(flatClass.isArray());
 		assertEquals(new Integer(1), flatClass.getArrayDimensions());
 		assertTrue(flatClass.isInterface());
-		assertEquals("com.mediadriver.atlas.java.test.v2.FlatPrimitiveInterface", flatClass.getFullyQualifiedName());
+		assertEquals("com.mediadriver.atlas.java.test.v2.FlatPrimitiveInterface", flatClass.getClassName());
 		validateFlatPrimitiveFields(flatClass);
 	}
 	
-	public static void validateFlatPrimitiveInterfaceTwoDimArray(Class<?> clazz) throws Exception {
-		JavaClass flatClass = ClassInspector.inspectClass(clazz);
+	public static void validateFlatPrimitiveInterfaceTwoDimArray(ClassInspectionService classInspectionService, Class<?> clazz) throws Exception {
+		JavaClass flatClass = classInspectionService.inspectClass(clazz);
 		validateFlatClass(flatClass);
-		assertEquals("FlatPrimitiveInterface", flatClass.getClassName());
 		assertTrue(flatClass.isArray());
 		assertEquals(new Integer(2), flatClass.getArrayDimensions());
 		assertTrue(flatClass.isInterface());
-		assertEquals("com.mediadriver.atlas.java.test.v2.FlatPrimitiveInterface", flatClass.getFullyQualifiedName());
+		assertEquals("com.mediadriver.atlas.java.test.v2.FlatPrimitiveInterface", flatClass.getClassName());
 		validateFlatPrimitiveFields(flatClass);
 	}
 	
-	public static void validateFlatPrimitiveInterfaceThreeDimArray(Class<?> clazz) throws Exception {
-		JavaClass flatClass = ClassInspector.inspectClass(clazz);
+	public static void validateFlatPrimitiveInterfaceThreeDimArray(ClassInspectionService classInspectionService, Class<?> clazz) throws Exception {
+		JavaClass flatClass = classInspectionService.inspectClass(clazz);
 		validateFlatClass(flatClass);
-		assertEquals("FlatPrimitiveInterface", flatClass.getClassName());
 		assertTrue(flatClass.isArray());
 		assertEquals(new Integer(3), flatClass.getArrayDimensions());
 		assertTrue(flatClass.isInterface());
-		assertEquals("com.mediadriver.atlas.java.test.v2.FlatPrimitiveInterface", flatClass.getFullyQualifiedName());
+		assertEquals("com.mediadriver.atlas.java.test.v2.FlatPrimitiveInterface", flatClass.getClassName());
 		validateFlatPrimitiveFields(flatClass);
 	}
 	
 	public static void validateFlatClass(JavaClass flatClass) {
 		assertNotNull(flatClass);
 		assertNotNull(flatClass.getClassName());
-		assertNotNull(flatClass.getFullyQualifiedName());
 		assertFalse(flatClass.isAnnonymous());
 		assertFalse(flatClass.isEnumeration());
 		assertFalse(flatClass.isLocalClass());
@@ -127,7 +112,7 @@ public class ClassValidationUtil {
 		assertFalse(flatClass.isPrimitive());
 		assertFalse(flatClass.isSynthetic());
 		assertNotNull(flatClass.getUri());
-		assertEquals(String.format(AtlasJavaModelFactory.URI_FORMAT, flatClass.getFullyQualifiedName()), flatClass.getUri());
+		assertEquals(String.format(AtlasJavaModelFactory.URI_FORMAT, flatClass.getClassName()), flatClass.getUri());
 	}
 	
 	public static void validateFlatPrimitiveFields(JavaClass flatClass) throws Exception {
@@ -144,7 +129,7 @@ public class ClassValidationUtil {
 		for(JavaField f : flatClass.getJavaFields().getJavaField()) {
 			assertNotNull(f);
 			assertTrue(f instanceof JavaField);
-			JavaField j = (JavaField)f;
+			JavaField j = f;
 			assertNotNull(j.getName());
 			switch(j.getType()) {
 			case BOOLEAN: 
@@ -235,10 +220,10 @@ public class ClassValidationUtil {
 		assertFalse(c.isPrimitive());
 		assertFalse(c.isSynthetic());
 		assertNotNull(c.getUri());
-		assertEquals(String.format(AtlasJavaModelFactory.URI_FORMAT, c.getFullyQualifiedName()), c.getUri());
+		assertEquals(String.format(AtlasJavaModelFactory.URI_FORMAT, c.getClassName()), c.getUri());
 		assertEquals("com.mediadriver.atlas.java.test.v2.TestContact", c.getClassName());
 		assertEquals("com.mediadriver.atlas.java.test.v2", c.getPackageName());
-		assertEquals("com.mediadriver.atlas.java.test.v2.TestContact", c.getFullyQualifiedName());
+		assertEquals("com.mediadriver.atlas.java.test.v2.TestContact", c.getClassName());
 		assertNotNull(c.getJavaEnumFields());
 		assertNotNull(c.getJavaEnumFields().getJavaEnumField());
 		assertEquals(new Integer(0), new Integer(c.getJavaEnumFields().getJavaEnumField().size()));
@@ -271,10 +256,10 @@ public class ClassValidationUtil {
 		assertFalse(c.isPrimitive());
 		assertFalse(c.isSynthetic());
 		assertNotNull(c.getUri());
-		assertEquals(String.format(AtlasJavaModelFactory.URI_FORMAT, c.getFullyQualifiedName()), c.getUri());
+		assertEquals(String.format(AtlasJavaModelFactory.URI_FORMAT, c.getClassName()), c.getUri());
 		assertEquals("com.mediadriver.atlas.java.test.v2.TestAddress", c.getClassName());
 		assertEquals("com.mediadriver.atlas.java.test.v2", c.getPackageName());
-		assertEquals("com.mediadriver.atlas.java.test.v2.TestAddress", c.getFullyQualifiedName());
+		assertEquals("com.mediadriver.atlas.java.test.v2.TestAddress", c.getClassName());
 		assertNotNull(c.getJavaEnumFields());
 		assertNotNull(c.getJavaEnumFields().getJavaEnumField());
 		assertEquals(new Integer(0), new Integer(c.getJavaEnumFields().getJavaEnumField().size()));

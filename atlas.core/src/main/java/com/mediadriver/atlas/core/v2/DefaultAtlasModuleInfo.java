@@ -15,11 +15,12 @@
  */
 package com.mediadriver.atlas.core.v2;
 
+import com.mediadriver.atlas.mxbean.v2.AtlasModuleInfoMXBean;
+import com.mediadriver.atlas.spi.v2.AtlasModuleInfo;
+
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.util.List;
-import com.mediadriver.atlas.mxbean.v2.AtlasModuleInfoMXBean;
-import com.mediadriver.atlas.spi.v2.AtlasModuleInfo;
 
 public class DefaultAtlasModuleInfo implements Serializable, AtlasModuleInfo, AtlasModuleInfoMXBean {
 	private static final long serialVersionUID = -4604837498041897724L;

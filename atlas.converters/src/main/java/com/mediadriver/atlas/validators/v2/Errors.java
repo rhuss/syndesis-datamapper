@@ -15,14 +15,13 @@
  */
 package com.mediadriver.atlas.validators.v2;
 
+import com.mediadriver.atlas.validators.v2.core.AtlasMappingError;
+
 import java.util.List;
 
 /**
- * Created by slepage on 3/12/17.
  */
 public interface Errors {
-
-//    void addAllErrors(Errors errors);
 
     void addError(AtlasMappingError error);
 

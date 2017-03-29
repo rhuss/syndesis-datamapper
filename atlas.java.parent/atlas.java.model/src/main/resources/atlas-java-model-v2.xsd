@@ -46,6 +46,7 @@
 			<extension base="atlas:Field">
 				<sequence>
 					<element name="Annotations" type="atlas:StringList" minOccurs="1" maxOccurs="1" />
+					<element name="Modifiers" type="atlasj:ModifierList" minOccurs="1" maxOccurs="1" />
 				</sequence>
 				<attribute name="name" type="string" use="required" />
 				<attribute name="path" type="string" use="optional" />
@@ -79,7 +80,6 @@
 					<element name="JavaFields" type="atlasj:JavaFields" minOccurs="1" maxOccurs="1" />
 				</sequence>
 				<attribute name="packageName" type="string" use="optional" />
-				<attribute name="fullyQualifiedName" type="string" use="optional" />
 				<attribute name="annotation" type="boolean" use="optional" />
 				<attribute name="annonymous" type="boolean" use="optional" />
 				<attribute name="enumeration" type="boolean" use="optional" /> 	
@@ -90,4 +90,65 @@
 			</extension>
 		</complexContent>
 	</complexType>
+	
+	<complexType name="MavenClasspathRequest">
+		<sequence>
+			<element name="pomXmlData" type="string" minOccurs="0" maxOccurs="1" />
+		</sequence>
+		<attribute name="executeTimeout" type="long" use="optional" />
+		<attribute name="workingDirectory" type="string" use="optional" />
+	</complexType>
+	
+	<complexType name="MavenClasspathResponse">
+		<attribute name="classpath" type="string" use="optional" />
+		<attribute name="errorMessage" type="string" use="optional" />
+		<attribute name="executionTime" type="long" use="optional" />
+	</complexType>
+	
+	<complexType name="ClassInspectionRequest">
+		<sequence>
+			<element name="FieldNameBlacklist" type="atlas:StringList" minOccurs="0" maxOcurs="1" />
+			<element name="ClassNameBlacklist" type="atlas:StringList" minOccurs="0" maxOcurs="1" />
+			<element name="classpath" type="string" minOccurs="0" maxOccurs="1" />
+		</sequence>
+		<attribute name="className" type="string" use="optional" />
+		<attribute name="disablePrivateOnlyFields" type="boolean" use="optional" />
+		<attribute name="disableProtectedOnlyFields" type="boolean" use="optional" />
+		<attribute name="disablePublicOnlyFields" type="boolean" use="optional" />
+		<attribute name="disablePublicGetterSetterFields" type="boolean" use="optional" />
+	</complexType>
+	
+	<complexType name="ClassInspectionResponse">
+		<sequence>
+			<element name="JavaClass" type="atlasj:JavaClass" minOccurs="0" maxOccurs="1" />
+		</sequence>
+		<attribute name="errorMessage" type="string" use="optional" />
+		<attribute name="executionTime" type="long" use="optional" />
+	</complexType>
+	
+	<complexType name="ModifierList">
+		<sequence>
+			<element name="Modifier" type="atlasj:Modifier" minOccurs="0" maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+	
+	<simpleType name="Modifier">
+		<restriction base="string">
+			<enumeration value="All" />
+			<enumeration value="Abstract" />
+			<enumeration value="Final" />
+			<enumeration value="Interface" />
+			<enumeration value="Native" />
+			<enumeration value="Public" />
+			<enumeration value="Protected" />
+			<enumeration value="Private" />
+			<enumeration value="Static" />
+			<enumeration value="Strict" />
+			<enumeration value="Synchronized" />
+			<enumeration value="Transient" />
+			<enumeration value="Volatile" />
+			<enumeration value="None" />
+		</restriction>
+	</simpleType>
+	
 </schema>

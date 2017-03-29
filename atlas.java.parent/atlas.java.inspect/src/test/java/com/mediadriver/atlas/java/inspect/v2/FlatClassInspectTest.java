@@ -15,50 +15,65 @@
  */
 package com.mediadriver.atlas.java.inspect.v2;
 
-import org.junit.Test;
 import com.mediadriver.atlas.java.test.v2.FlatPrimitiveClass;
 import com.mediadriver.atlas.java.test.v2.FlatPrimitiveInterface;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 public class FlatClassInspectTest {
 
+	private ClassInspectionService classInspectionService = null;
+	
+	@Before
+	public void setUp() {
+		classInspectionService = new ClassInspectionService();
+	}
+	
+	@After
+	public void tearDown() {
+		classInspectionService = null;
+	}
+	
 	@Test
 	public void testFlatPrimitiveClass() throws Exception {
-		ClassValidationUtil.validateFlatPrimitiveClass(FlatPrimitiveClass.class);
+		ClassValidationUtil.validateFlatPrimitiveClass(classInspectionService, FlatPrimitiveClass.class);
 	}
 
 	@Test
 	public void testFlatPrimitiveClassArray() throws Exception {
-		ClassValidationUtil.validateFlatPrimitiveClassArray(FlatPrimitiveClass[].class);
+		ClassValidationUtil.validateFlatPrimitiveClassArray(classInspectionService, FlatPrimitiveClass[].class);
 	}
 	
 	@Test
 	public void testFlatPrimitiveClassTwoDimArray() throws Exception {
-		ClassValidationUtil.validateFlatPrimitiveClassTwoDimArray(FlatPrimitiveClass[][].class);
+		ClassValidationUtil.validateFlatPrimitiveClassTwoDimArray(classInspectionService, FlatPrimitiveClass[][].class);
 	}
 	
 	@Test
 	public void testFlatPrimitiveClassThreeDimArray() throws Exception {
-		ClassValidationUtil.validateFlatPrimitiveClassThreeDimArray(FlatPrimitiveClass[][][].class);
+		ClassValidationUtil.validateFlatPrimitiveClassThreeDimArray(classInspectionService, FlatPrimitiveClass[][][].class);
 	}
 	
 	@Test
 	public void testFlatPrimitiveInterface() throws Exception {
-		ClassValidationUtil.validateFlatPrimitiveInterface(FlatPrimitiveInterface.class);
+		ClassValidationUtil.validateFlatPrimitiveInterface(classInspectionService, FlatPrimitiveInterface.class);
 	}
 	
 	@Test
 	public void testFlatPrimitiveInterfaceArray() throws Exception {
-		ClassValidationUtil.validateFlatPrimitiveInterfaceArray(FlatPrimitiveInterface[].class);
+		ClassValidationUtil.validateFlatPrimitiveInterfaceArray(classInspectionService, FlatPrimitiveInterface[].class);
 	}
 	
 	@Test
 	public void testFlatPrimitiveInterfaceTwoDimArray() throws Exception {
-		ClassValidationUtil.validateFlatPrimitiveInterfaceTwoDimArray(FlatPrimitiveInterface[][].class);
+		ClassValidationUtil.validateFlatPrimitiveInterfaceTwoDimArray(classInspectionService, FlatPrimitiveInterface[][].class);
 	}
 	
 	@Test
 	public void testFlatPrimitiveInterfaceThreeDimArray() throws Exception {
-		ClassValidationUtil.validateFlatPrimitiveInterfaceThreeDimArray(FlatPrimitiveInterface[][][].class);
+		ClassValidationUtil.validateFlatPrimitiveInterfaceThreeDimArray(classInspectionService, FlatPrimitiveInterface[][][].class);
 	}
 
 }

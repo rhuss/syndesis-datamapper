@@ -18,13 +18,23 @@
 -->
 <AtlasMapping xmlns="http://mediadriver.com/atlas/v2" xmlns:ns2="http://mediadriver.com/atlas/java/v2" name="junit">
     <FieldMappings>
-        <FieldMapping xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="MapFieldMapping">
-            <InputField>
-                <Field xsi:type="ns2:JavaField" name="foo" value="bar"/>
-            </InputField>
-            <OutputField>
-                <Field xsi:type="ns2:JavaField" name="woot" value="blerg"/>
-            </OutputField>
-        </FieldMapping>
+        <CollectionFieldMapping xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="MapFieldMapping">
+        	<MapFieldMapping>
+            	<InputField>
+                	<Field xsi:type="ns2:JavaField" name="foo" value="bar"/>
+            	</InputField>
+            	<OutputField>
+                	<Field xsi:type="ns2:JavaField" name="woot" value="blerg"/>
+            	</OutputField>
+            </MapFieldMapping>	
+           	<MapFieldMapping>
+            	<InputField>
+                	<Field xsi:type="ns2:JavaField" name="subclass.foo" value="bar"/>
+            	</InputField>
+            	<OutputField>
+                	<Field xsi:type="ns2:JavaField" name="othersubclass.bleh" value="blerg"/>
+            	</OutputField>
+            </MapFieldMapping>
+        </CollectionFieldMapping>
     </FieldMappings>
 </AtlasMapping>

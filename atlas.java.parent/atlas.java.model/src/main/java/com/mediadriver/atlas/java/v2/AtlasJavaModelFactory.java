@@ -26,4 +26,9 @@ public class AtlasJavaModelFactory {
 		return javaClass;
 	}
 	
+	public static JavaField createJavaField() {
+		JavaField javaField = new JavaField();
+		javaField.setModifiers(new ModifierList());
+		return javaField;
+	}
 }

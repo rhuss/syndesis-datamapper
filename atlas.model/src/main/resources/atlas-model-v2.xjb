@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <jaxb:bindings xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" xmlns:xs="http://www.w3.org/2001/XMLSchema"
-    xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:annox="http://annox.dev.java.net"
-    xmlns:namespace="http://jaxb2-commons.dev.java.net/namespace-prefix"
-    xsi:schemaLocation="http://java.sun.com/xml/ns/jaxb http://java.sun.com/xml/ns/jaxb/bindingschema_2_0.xsd"
-    jaxb:extensionBindingPrefixes="xjc annox"
-    version="2.1">
+               xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xmlns:annox="http://annox.dev.java.net"
+               xsi:schemaLocation="http://java.sun.com/xml/ns/jaxb http://java.sun.com/xml/ns/jaxb/bindingschema_2_0.xsd"
+               jaxb:extensionBindingPrefixes="xjc annox"
+               version="2.1">
         
     <jaxb:globalBindings>
         <!-- Force all classes implements Serializable -->
@@ -27,6 +26,9 @@
         </jaxb:bindings>
 		<jaxb:bindings node="xs:complexType[@name='FieldMapping']">
 			<annox:annotate><annox:annotate annox:class="com.fasterxml.jackson.annotation.JsonTypeInfo" use="CLASS" include="PROPERTY" property="jsonType"></annox:annotate></annox:annotate>		
+        </jaxb:bindings>
+		<jaxb:bindings node="xs:complexType[@name='LookupFieldMapping']">
+			<annox:annotate><annox:annotate annox:class="com.fasterxml.jackson.annotation.JsonRootName">com.mediadriver.atlas.v2.MapFieldMapping</annox:annotate></annox:annotate>
         </jaxb:bindings>
         <jaxb:bindings node="xs:complexType[@name='MapFieldMapping']">
 			<annox:annotate><annox:annotate annox:class="com.fasterxml.jackson.annotation.JsonRootName">com.mediadriver.atlas.v2.MapFieldMapping</annox:annotate></annox:annotate>

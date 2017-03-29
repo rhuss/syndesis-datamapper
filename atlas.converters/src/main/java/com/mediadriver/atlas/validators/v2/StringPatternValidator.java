@@ -15,11 +15,12 @@
  */
 package com.mediadriver.atlas.validators.v2;
 
+import com.mediadriver.atlas.validators.v2.core.AtlasMappingError;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by slepage on 3/12/17.
  */
 public class StringPatternValidator implements Validator {
 

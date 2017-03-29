@@ -15,6 +15,9 @@
  */
 package com.mediadriver.atlas.core.v2;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
@@ -25,9 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class AtlasUtil {
 	public static final int SPLIT_LIMIT = 4;
@@ -47,10 +47,7 @@ public class AtlasUtil {
 	}
 	
 	public static boolean isEmpty(String string) {
-		if(string == null || string.isEmpty() || string.matches("^\\s+$")) {
-			return true;
-		}
-		return false;
+		return string == null || string.isEmpty() || string.matches("^\\s+$");
 	}
 	
 	public static boolean matchUriModule(String uriA, String uriB) {
@@ -61,12 +58,9 @@ public class AtlasUtil {
 		if(getUriModule(uriA) == null || getUriModule(uriB) == null) {
 			return false;
 		}
-		
-		if(getUriModule(uriA).equalsIgnoreCase(getUriModule(uriB))) {
-			return true;
-		}
-		
-		return false;
+
+		return getUriModule(uriA).equalsIgnoreCase(getUriModule(uriB));
+
 	}
 	
 	protected static void validateUri(String atlasUri) {	

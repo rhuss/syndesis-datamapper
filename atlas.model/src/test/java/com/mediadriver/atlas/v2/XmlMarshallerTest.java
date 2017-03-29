@@ -16,18 +16,18 @@
 package com.mediadriver.atlas.v2;
 
 import static org.junit.Assert.*;
-
-import java.io.File;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
+import java.io.File;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertNotNull;
 
 public class XmlMarshallerTest extends BaseMarshallerTest {
 
@@ -66,6 +66,26 @@ public class XmlMarshallerTest extends BaseMarshallerTest {
 		assertNotNull(mappingElem);
 		assertNotNull(mappingElem.getValue());
 		validateAtlasMapping(mappingElem.getValue());
+	}
+	
+	@Test
+	public void testXmlLookupTable() throws Exception {
+		AtlasMapping atlasMapping = generateAtlasMapping();
+		atlasMapping.getLookupTables().getLookupTable().add(generateLookupTable());
+		marshaller.marshal(atlasMapping, new File("target/junit/" + testName.getMethodName() + "/" + "atlasmapping.xml"));
+		StreamSource fileSource = new StreamSource(new File("target/junit/" + testName.getMethodName() + "/" + "atlasmapping.xml"));
+		JAXBElement<AtlasMapping> mappingElem = unmarshaller.unmarshal(fileSource, AtlasMapping.class);
+		assertNotNull(mappingElem);
+		
+		AtlasMapping tmpMapping = mappingElem.getValue();
+		assertNotNull(tmpMapping);
+		validateAtlasMapping(tmpMapping);
+		assertNotNull(tmpMapping.getLookupTables());
+		assertNotNull(tmpMapping.getLookupTables().getLookupTable());
+		assertEquals(new Integer(1), new Integer(tmpMapping.getLookupTables().getLookupTable().size()));
+		assertNotNull(tmpMapping.getLookupTables().getLookupTable().get(0).getLookupEntryList());
+		assertNotNull(tmpMapping.getLookupTables().getLookupTable().get(0).getLookupEntryList().getLookupEntry());
+		assertEquals(new Integer(2), new Integer(tmpMapping.getLookupTables().getLookupTable().get(0).getLookupEntryList().getLookupEntry().size()));
 	}
 
 }

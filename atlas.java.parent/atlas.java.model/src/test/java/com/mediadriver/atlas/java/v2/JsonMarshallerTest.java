@@ -15,17 +15,18 @@
  */
 package com.mediadriver.atlas.java.v2;
 
-import static org.junit.Assert.*;
-
-import java.io.File;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.mediadriver.atlas.v2.AtlasMapping;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.File;
+
+import static org.junit.Assert.assertNotNull;
 
 public class JsonMarshallerTest extends BaseMarshallerTest {
 
@@ -70,5 +71,22 @@ public class JsonMarshallerTest extends BaseMarshallerTest {
 		assertNotNull(uMapping);
 		validateSeparateAtlasMapping(uMapping);
 	}
+	
+	@Test
+	public void testJsonMavenClasspathRequest() throws Exception {	
+		MavenClasspathRequest request = generateMavenClasspathRequest();
+		//Object to JSON in file
+		mapper.writeValue(new File("target" + File.separator + "junit" + File.separator + testName.getMethodName() + File.separator + "atlasmapping-mavenclasspath-request.json"), request);
+		MavenClasspathRequest uRequest = mapper.readValue(new File("target" + File.separator + "junit" + File.separator + testName.getMethodName() + File.separator + "atlasmapping-mavenclasspath-request.json"), MavenClasspathRequest.class);
+		assertNotNull(uRequest);
+	}
 
+	@Test
+	public void testJsonClassInspectionRequest() throws Exception {	
+		ClassInspectionRequest request = generateClassInspectionRequest();
+		//Object to JSON in file
+		mapper.writeValue(new File("target" + File.separator + "junit" + File.separator + testName.getMethodName() + File.separator + "atlasmapping-classinspection-request.json"), request);
+		ClassInspectionRequest uRequest = mapper.readValue(new File("target" + File.separator + "junit" + File.separator + testName.getMethodName() + File.separator + "atlasmapping-classinspection-request.json"), ClassInspectionRequest.class);
+		assertNotNull(uRequest);
+	}
 }

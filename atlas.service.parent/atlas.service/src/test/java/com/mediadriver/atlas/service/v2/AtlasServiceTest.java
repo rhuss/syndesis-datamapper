@@ -15,18 +15,6 @@
  */
 package com.mediadriver.atlas.service.v2;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.net.URI;
-
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,6 +27,16 @@ import com.mediadriver.atlas.v2.MockField;
 import com.mediadriver.atlas.v2.SeparateFieldMapping;
 import com.mediadriver.atlas.v2.StringMap;
 import com.mediadriver.atlas.v2.StringMapEntry;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import java.io.File;
+import java.net.URI;
+
+import static org.junit.Assert.assertTrue;
 
 
 
@@ -113,6 +111,12 @@ public class AtlasServiceTest {
 	@Test
 	public void testAtlasSeparateMappingDeserialization() throws Exception {
 		File f = new File("src/test/resources/atasmapping-mockfield-PUT-create-seperate-sample.json");
+		AtlasMapping mapping = mapper.readValue(f, AtlasMapping.class);
+	}
+	
+	@Test
+	public void testAtlasLookupMappingDeserialization() throws Exception {
+		File f = new File("src/test/resources/atlasmapping-lookup-sample.json");
 		AtlasMapping mapping = mapper.readValue(f, AtlasMapping.class);
 	}
 	

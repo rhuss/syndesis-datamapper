@@ -15,8 +15,9 @@
  */
 package com.mediadriver.atlas.validators.v2;
 
+import com.mediadriver.atlas.validators.v2.core.AtlasMappingError;
+
 /**
- * Created by slepage on 3/12/17.
  */
 public interface Validator {
 

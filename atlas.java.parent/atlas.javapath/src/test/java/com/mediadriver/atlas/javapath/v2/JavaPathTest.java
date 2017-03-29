@@ -15,9 +15,9 @@
  */
 package com.mediadriver.atlas.javapath.v2;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class JavaPathTest {	
 	

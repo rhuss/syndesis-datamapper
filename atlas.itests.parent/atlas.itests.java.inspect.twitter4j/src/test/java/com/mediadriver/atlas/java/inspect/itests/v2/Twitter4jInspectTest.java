@@ -15,29 +15,43 @@
  */
 package com.mediadriver.atlas.java.inspect.itests.v2;
 
-import static org.junit.Assert.*;
-
+import com.mediadriver.atlas.java.inspect.v2.ClassInspectionService;
+import com.mediadriver.atlas.java.v2.JavaClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.mediadriver.atlas.java.inspect.v2.ClassInspector;
-import com.mediadriver.atlas.java.v2.JavaClass;
+import static org.junit.Assert.assertNotNull;
+
+import org.junit.After;
+import org.junit.Before;
 
 public class Twitter4jInspectTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(Twitter4jInspectTest.class);
 	
+	private ClassInspectionService classInspectionService = null;
+	
+	@Before
+	public void setUp() {
+		classInspectionService = new ClassInspectionService();
+	}
+	
+	@After
+	public void tearDown() {
+		classInspectionService = null;
+	}
+	
 	@Test
 	public void testInspectTwitter4jStatus() {
-		JavaClass j = ClassInspector.inspectClass("twitter4j.Status");
+		JavaClass j = classInspectionService.inspectClass("twitter4j.Status");
 		assertNotNull(j);
 		logger.debug("Hello");
 	}
 	
 	@Test
 	public void testInspectTwitter4jStatusJSONImpl() {
-		JavaClass j = ClassInspector.inspectClass("twitter4j.StatusJSONImpl");
+		JavaClass j = classInspectionService.inspectClass("twitter4j.StatusJSONImpl");
 		assertNotNull(j);
 		logger.debug("Hello");
 	}

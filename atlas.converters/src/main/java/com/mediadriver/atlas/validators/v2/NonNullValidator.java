@@ -15,8 +15,9 @@
  */
 package com.mediadriver.atlas.validators.v2;
 
+import com.mediadriver.atlas.validators.v2.core.AtlasMappingError;
+
 /**
- * Created by on 3/12/17.
  */
 public class NonNullValidator implements Validator {
 
@@ -43,7 +44,7 @@ public class NonNullValidator implements Validator {
     public void validate(Object target, Errors errors, AtlasMappingError.Level level) {
 
         if (target == null) {
-            errors.addError(new AtlasMappingError(field, target, this.violationMessage, level));
+            errors.addError(new AtlasMappingError(field, null, this.violationMessage, level));
         } else if (target.getClass().isAssignableFrom(String.class)) {
             String value = (String) target;
             if (value.trim().isEmpty()) {

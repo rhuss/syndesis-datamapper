@@ -15,17 +15,16 @@
  */
 package com.mediadriver.atlas.java.inspect.v2;
 
-import static org.junit.Assert.*;
-
 import com.mediadriver.atlas.java.v2.AtlasJavaModelFactory;
 import com.mediadriver.atlas.java.v2.JavaClass;
+
+import static org.junit.Assert.*;
 
 public class PrimitiveValidationUtil {
 
 	public static void validatePrimitive(JavaClass j, String name) {
 		validatePrimitiveCommon(j);
 		assertEquals(name, j.getClassName());
-		assertEquals(name, j.getFullyQualifiedName());
 		assertFalse(j.isArray());
 		assertNull(j.getArrayDimensions());
 	}
@@ -33,7 +32,6 @@ public class PrimitiveValidationUtil {
 	public static void validatePrimitiveArray(JavaClass j, String name, int dim) {
 		validatePrimitiveCommon(j);
 		assertEquals(name, j.getClassName());
-		assertEquals(name, j.getFullyQualifiedName());
 		assertTrue(j.isArray());
 		assertEquals(new Integer(dim), j.getArrayDimensions());
 	}
@@ -56,6 +54,6 @@ public class PrimitiveValidationUtil {
 		assertTrue(j.getJavaEnumFields().getJavaEnumField().size() == 0);
 		assertNull(j.getPackageName());
 		assertNotNull(j.getUri());
-		assertEquals(String.format(AtlasJavaModelFactory.URI_FORMAT, j.getFullyQualifiedName()), j.getUri());
+		assertEquals(String.format(AtlasJavaModelFactory.URI_FORMAT, j.getClassName()), j.getUri());
 	}
 }

@@ -15,14 +15,15 @@
  */
 package com.mediadriver.atlas.api.v2;
 
-import java.util.Map;
 import com.mediadriver.atlas.v2.AtlasMapping;
+
+import java.util.Map;
 
 public interface AtlasContextFactory {
 
-	public void init();
-	public void destroy();
-	public AtlasContext createContext(AtlasMapping atlasMapping) throws AtlasException;
-	public void setProperties(Map<String, String> properties);
-	public Map<String, String> getProperties();
+	void init();
+	void destroy();
+	AtlasContext createContext(AtlasMapping atlasMapping) throws AtlasException;
+	void setProperties(Map<String, String> properties);
+	Map<String, String> getProperties();
 }

@@ -15,23 +15,6 @@
  */
 package com.mediadriver.atlas.itests.v2;
 
-import static org.junit.Assert.*;
-
-import java.io.File;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Date;
-
-import javax.ws.rs.core.UriInfo;
-
-import org.apache.camel.salesforce.dto.Contact;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.mediadriver.atlas.api.v2.AtlasContext;
 import com.mediadriver.atlas.api.v2.AtlasContextFactory;
 import com.mediadriver.atlas.api.v2.AtlasSession;
@@ -46,19 +29,21 @@ import com.mediadriver.atlas.v2.MapAction;
 import com.mediadriver.atlas.v2.MapFieldMapping;
 import com.mediadriver.atlas.v2.MappedField;
 import com.mediadriver.atlas.v2.SeparateFieldMapping;
-
-import twitter4j.ExtendedMediaEntity;
-import twitter4j.GeoLocation;
-import twitter4j.HashtagEntity;
-import twitter4j.MediaEntity;
-import twitter4j.Place;
-import twitter4j.RateLimitStatus;
-import twitter4j.Scopes;
+import org.apache.camel.salesforce.dto.Contact;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import twitter4j.Status;
-import twitter4j.SymbolEntity;
-import twitter4j.URLEntity;
-import twitter4j.User;
-import twitter4j.UserMentionEntity;
+
+import javax.ws.rs.core.UriInfo;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class TwitterToSalesForceTest {
 

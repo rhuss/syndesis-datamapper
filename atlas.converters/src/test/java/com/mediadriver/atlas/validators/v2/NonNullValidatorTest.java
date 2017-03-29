@@ -15,13 +15,14 @@
  */
 package com.mediadriver.atlas.validators.v2;
 
+import com.mediadriver.atlas.validators.v2.core.AtlasMappingError;
+import com.mediadriver.atlas.validators.v2.core.AtlasMappingErrors;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 /**
- * Created by slepage on 3/14/17.
  */
 public class NonNullValidatorTest {
 
@@ -51,8 +52,7 @@ public class NonNullValidatorTest {
     public void validate_invalid() throws Exception {
         validator = new NonNullValidator("qwerty", "Cannot be null");
         errors = new AtlasMappingErrors();
-        String pass = null;
-        validator.validate(pass, errors);
+        validator.validate(null, errors);
         assertTrue(errors.hasErrors());
         assertThat(errors.getAllErrors().size(), is(1));
 

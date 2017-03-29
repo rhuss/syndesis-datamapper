@@ -15,10 +15,6 @@
  */
 package com.mediadriver.atlas.java.module.v2;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import com.mediadriver.atlas.api.v2.AtlasException;
 import com.mediadriver.atlas.api.v2.AtlasNotFoundException;
 import com.mediadriver.atlas.api.v2.AtlasSession;
@@ -28,17 +24,12 @@ import com.mediadriver.atlas.javapath.v2.JavaPath;
 import com.mediadriver.atlas.spi.v2.AtlasModule;
 import com.mediadriver.atlas.spi.v2.AtlasModuleDetail;
 import com.mediadriver.atlas.spi.v2.AtlasModuleMode;
-import com.mediadriver.atlas.v2.AtlasMapping;
-import com.mediadriver.atlas.v2.AtlasModelFactory;
-import com.mediadriver.atlas.v2.Field;
-import com.mediadriver.atlas.v2.FieldAction;
-import com.mediadriver.atlas.v2.FieldActions;
-import com.mediadriver.atlas.v2.FieldMapping;
-import com.mediadriver.atlas.v2.FieldMappings;
-import com.mediadriver.atlas.v2.MapAction;
-import com.mediadriver.atlas.v2.MapFieldMapping;
-import com.mediadriver.atlas.v2.MappedField;
-import com.mediadriver.atlas.v2.SeparateFieldMapping;
+import com.mediadriver.atlas.v2.*;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @AtlasModuleDetail(name="JavaModule", uri="atlas:java", modes={"SOURCE", "TARGET"}, dataFormats={"java"}, configPackages={"com.mediadriver.atlas.java.v2"})
 public class JavaModule implements AtlasModule {

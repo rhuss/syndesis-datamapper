@@ -22,6 +22,8 @@
 				}
 			}]
 		},
+		"lookupTables":{"lookupTable":[]},
+		"properties":{"property":[]},
 		"name":"junit"
 	}
 }

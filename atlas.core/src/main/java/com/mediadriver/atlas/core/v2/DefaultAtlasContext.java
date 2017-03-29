@@ -15,20 +15,6 @@
  */
 package com.mediadriver.atlas.core.v2;
 
-import java.lang.management.ManagementFactory;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.UUID;
-
-import javax.management.ObjectName;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.mediadriver.atlas.api.v2.AtlasContext;
 import com.mediadriver.atlas.api.v2.AtlasException;
 import com.mediadriver.atlas.api.v2.AtlasSession;
@@ -37,6 +23,18 @@ import com.mediadriver.atlas.spi.v2.AtlasModule;
 import com.mediadriver.atlas.spi.v2.AtlasModuleInfo;
 import com.mediadriver.atlas.spi.v2.AtlasModuleMode;
 import com.mediadriver.atlas.v2.AtlasMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.management.ObjectName;
+import java.lang.management.ManagementFactory;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
+import java.util.UUID;
 
 public class DefaultAtlasContext implements AtlasContext, AtlasContextMXBean {
 

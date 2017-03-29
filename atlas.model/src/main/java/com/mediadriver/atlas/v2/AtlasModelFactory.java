@@ -96,6 +96,9 @@ public class AtlasModelFactory {
 		} else if(clazz.isAssignableFrom(MapFieldMapping.class)) {
 			fm = (T) new MapFieldMapping();
 			return fm;
+		} else if(clazz.isAssignableFrom(LookupFieldMapping.class)) {
+			fm = (T) new LookupFieldMapping();
+			return fm;
 		} else {
 			throw new IllegalStateException("Unsupported class: " + clazz.getName());
 		}
@@ -105,6 +108,7 @@ public class AtlasModelFactory {
 		AtlasMapping mapping = new AtlasMapping();
 		mapping.setFieldMappings(new FieldMappings());
 		mapping.setProperties(new Properties());
+		mapping.setLookupTables(new LookupTables());
 		return mapping;
 	}
 	
@@ -112,5 +116,17 @@ public class AtlasModelFactory {
 		MappedField mappedField = new MappedField();
 		mappedField.setFieldActions(new FieldActions());
 		return mappedField;
+	}
+	
+	public static LookupTable createLookupTable() {
+		LookupTable lookupTable = new LookupTable();
+		lookupTable.setLookupEntryList(new LookupEntryList());
+		return lookupTable;
+	}
+	
+	public static CollectionFieldMapping createCollectionFieldMapping() {
+		CollectionFieldMapping collectionFieldMapping = new CollectionFieldMapping();
+		collectionFieldMapping.getFieldMappings().add(new FieldMappings());
+		return collectionFieldMapping;
 	}
 }
