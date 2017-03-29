@@ -34,7 +34,7 @@
     <failOnMissingWebXml>false</failOnMissingWebXml>
     <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
     <java-image.version>1.2</java-image.version>
-    <ipaas.connector.version>0.3.1</ipaas.connector.version>
+    <ipaas.connector.version>0.3.2</ipaas.connector.version>
     <camel.version>2.19.0.fuse-000022</camel.version>
   </properties>
 
