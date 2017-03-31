@@ -90,6 +90,17 @@ public class JavaService extends Application {
     			.build();
     }
     
+    @OPTIONS
+    @Path("/mavenclasspath")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response generateClasspathCORS() throws Exception {
+    	return Response.ok()
+    			.header("Access-Control-Allow-Origin", "*")
+    			.header("Access-Control-Allow-Headers", "Content-Type")
+    			.header("Access-Control-Allow-Methods", "GET,PUT,POST,PATCH,DELETE")
+    			.build();
+    }
+    
     @POST
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
