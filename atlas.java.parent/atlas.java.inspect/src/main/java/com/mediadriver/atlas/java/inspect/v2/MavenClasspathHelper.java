@@ -15,190 +15,120 @@
  */
 package com.mediadriver.atlas.java.inspect.v2;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Stream;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MavenClasspathHelper {
-	
-	private static final Logger logger = LoggerFactory.getLogger(MavenClasspathHelper.class);
-	
-	private long processCheckInterval = 1000l;
-	private long processMaxExecutionTime = 5000l;
-	private String baseFolder = System.getProperty("java.io.tmpdir");
-	public static final String WORKING_FOLDER_PREFIX = "atlas-mapping-mvn-";
-	
-	public String generateClasspathFromPom(String pom) throws Exception {
-		
-		if(pom == null || pom.isEmpty()) {
-			return null;
-		}
-		
-		Path workingDirectory = createWorkingDirectory();
-		Path pomFile = Paths.get(workingDirectory.toString(), "pom.xml");
-        Files.write(pomFile, pom.getBytes());
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
-		List<String> cmd = new LinkedList<String>();
-		cmd.add("mvn");
-		cmd.add("org.apache.maven.plugins:maven-dependency-plugin:3.0.0:build-classpath");
-		cmd.add("-DincludeScope=runtime");
-		
-		String result = executeMavenProcess(workingDirectory.toString(), cmd);
-		
-		if(result != null) {
-			result = parseClasspathFromMavenOutput(result);
-		} else {
-			logger.error("MavenProcess returned unexpected result: " + result);
-			throw new InspectionException("Unable to generate classpath from pom file");
-		}
-		
+public class MavenClasspathHelper {
+
+	private static final Logger logger = LoggerFactory.getLogger(MavenClasspathHelper.class);
+
+	private long processCheckInterval = 1000l;
+	private long processMaxExecutionTime = 60000l;
+	public static final String WORKING_FOLDER_PREFIX = "atlas-mapping-mvn-";
+
+	public String generateClasspathFromPom(String pomText) throws IOException, InterruptedException {
+		byte[] pom = pomText.getBytes("UTF-8");
+		java.nio.file.Path workingDirectory = createWorkingDirectory();
 		try {
-			deleteWorkingDirectory(workingDirectory);
-		} catch (IOException ioe) {
-			logger.warn("Cleanup of working directory failed to complete: " + ioe.getMessage(), ioe);
+			Files.write(workingDirectory.resolve("pom.xml"), pom);
+			ArrayList<String> args = new ArrayList<>();
+			args.add("mvn");
+			args.add("org.apache.maven.plugins:maven-dependency-plugin:3.0.0:build-classpath");
+			args.add("-DincludeScope=runtime");
+			// In case we ever want to configure were the local mvn repo lives:
+			//if (localMavenRepoLocation != null) {
+			//	args.add("-Dmaven.repo.local=" + localMavenRepoLocation);
+			//}
+			return executeMavenProcess(workingDirectory, args);
+		} finally {
+			try {
+				deleteWorkingDirectory(workingDirectory);
+			} catch (IOException ioe) {
+				logger.warn("Cleanup of working directory failed to complete: " + ioe.getMessage(), ioe);
+			}
 		}
-	
+	}
+
+	protected String executeMavenProcess(Path workingDirectory, List<String> args) throws IOException, InterruptedException {
+		ProcessBuilder builder = new ProcessBuilder().command(args)
+				.redirectError(ProcessBuilder.Redirect.INHERIT)
+				.directory(workingDirectory.toFile());
+		// In case we ever want to configure the env:
+		// Map<String, String> environment = builder.environment();
+		// environment.put("MAVEN_OPTS", "-Xmx64M");
+		Process mvn = builder.start();
+
+		AtomicBoolean timedOut = new AtomicBoolean(false);
+		Thread timeoutEnforcer = new Thread("Timeout Enforcer") {
+			@Override
+			synchronized public void run() {
+				try {
+					long start = System.currentTimeMillis();
+					while (mvn.isAlive()) {
+						long totalTime = System.currentTimeMillis() - start;
+						if (totalTime >= getProcessMaxExecutionTime()) {
+							mvn.destroy();
+							timedOut.set(true);
+						}
+						// use wait so we can more quickly make this thread exit via a notify.
+						this.wait(getProcessCheckInterval());
+					}
+				} catch (InterruptedException e) {
+					logger.debug("Interrupted", e);
+				}
+			}
+		};
+		timeoutEnforcer.start();
+
+		try {
+			String result = parseClasspath(mvn.getInputStream());
+			if (timedOut.get()) {
+				throw new IOException("mvn killed due to exceeding max process time");
+			}
+			if (mvn.waitFor() != 0) {
+				throw new IOException("Could not get the connector classpath, mvn exit value: " + mvn.exitValue());
+			}
+			return result;
+		} finally {
+			synchronized (timeoutEnforcer) {
+				timeoutEnforcer.notify();
+			}
+			mvn.getInputStream().close();
+			mvn.getOutputStream().close();
+		}
+	}
+
+	private String parseClasspath(InputStream inputStream) throws IOException {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+		boolean useNextLine = true;
+		String result = null;
+		String line;
+		while ((line = reader.readLine()) != null) {
+			System.out.println("mvn: " + line);
+			if (useNextLine) {
+				useNextLine = false;
+				result = line;
+			}
+			if (line.startsWith("[INFO] Dependencies classpath:")) {
+				useNextLine = true;
+			}
+		}
 		return result;
 	}
-	
-	protected String executeMavenProcess(String workingDirectory, List<String> cmd) throws IOException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Starting to execute process for command: " + cmd + " workingDirectory: " + workingDirectory);
-		}
 
-		File cwd = null;
-		long startTime = System.currentTimeMillis();
-		long totalTime = 0;
-		Process process = null;
-		StringBuilder outputMessage = new StringBuilder();
-
-		if (workingDirectory == null || workingDirectory.isEmpty() || cmd == null || cmd.isEmpty() || cmd.get(0).isEmpty()) {
-			logger.error("Invalid workingDirectory: " + workingDirectory + " or command: " + cmd + " specified");
-			throw new IllegalArgumentException("Working directory and command must be specified");
-		}
-
-		if (workingDirectory != null) {
-			cwd = new File(workingDirectory);
-			if (!cwd.exists()) {
-				throw new IOException("Working Directory does not exist: " + workingDirectory);
-			} else if (!cwd.isDirectory()) {
-				throw new IOException("Working Directory is not a directory: " + workingDirectory);
-			}
-		}
-
-		try {
-			ProcessBuilder processBuilder = new ProcessBuilder(cmd);
-			processBuilder.redirectErrorStream(true);
-			processBuilder.directory(new File(workingDirectory));
-
-			process = processBuilder.start();
-			boolean running = true;
-			int r = -1;
-
-			while (running) {
-				Thread.sleep(getProcessCheckInterval());
-				totalTime = totalTime + getProcessCheckInterval();
-
-				if (totalTime >= getProcessMaxExecutionTime()) {
-					process.destroy();
-					running = false;
-					throw new IOException("Command " + cmd + " killed due to exceeding max process time");
-				}
-
-				try {
-					r = process.exitValue();
-					running = false;
-					if (r != 0) {
-						outputMessage.append("Command returned non-zero exit code: " + r);
-					}
-
-					if (process != null) {
-						InputStream stdout = null;
-						BufferedReader reader = null;
-
-						try {
-							stdout = process.getInputStream();
-							reader = new BufferedReader(new InputStreamReader(stdout));
-							String line = null;
-							while ((line = reader.readLine()) != null) {
-								if (outputMessage.length() > 0) {
-									outputMessage.append("\n" + line);
-								} else {
-									outputMessage.append(line);
-								}
-							}
-
-						} catch (Exception e) {
-							logger.error("Error reading output for command: " + cmd + " msg: " + e.getMessage());
-						} finally {
-							if (reader != null) {
-								try {
-									reader.close();
-								} catch (Exception e) {
-									logger.warn("Error closing BufferedReader for cmd: " + cmd);
-								} finally {
-									reader = null;
-								}
-							}
-							if (stdout != null) {
-								try {
-									stdout.close();
-								} catch (Exception e) {
-									logger.warn("Error closing InputStream for cmd: " + cmd);
-								} finally {
-									stdout = null;
-								}
-							}
-						}
-					}
-
-				} catch (IllegalThreadStateException itse) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Command still running: " + cmd + " msg: " + itse.getMessage());
-					}
-				}
-			}
-
-		} catch (IllegalArgumentException iae) {
-			String errMsg = "Unable to execute command: " + cmd + " error: " + iae.getMessage();
-			logger.error(errMsg);
-			throw new IOException(errMsg);
-		} catch (IOException ioe) {
-			String errMsg = "Unable to execute command: " + cmd + " error: " + ioe.getMessage();
-			logger.error(errMsg);
-			throw new IOException(errMsg);
-		} catch (InterruptedException intre) {
-			String errMsg = "Command interrupted cmd: " + cmd + " error: " + intre.getMessage();
-			logger.error(errMsg);
-			throw new IOException(errMsg);
-		} finally {
-			if (process != null) {
-				try {
-					process.destroy();
-				} catch (Throwable t) {
-					logger.error("Erorr while attempting to destroy process for command: " + cmd + " msg: " + t.getMessage());
-				}
-			}
-
-			if (logger.isDebugEnabled()) {
-				logger.debug("Exiting process for command: " + cmd + " exec time(ms): " + (System.currentTimeMillis() - startTime) + " workingDirectory: " + workingDirectory);
-			}
-		}
-
-		return outputMessage.toString();
-	}
 
 	protected Path createWorkingDirectory() throws IOException {
 		return Files.createTempDirectory(WORKING_FOLDER_PREFIX);
@@ -208,7 +138,7 @@ public class MavenClasspathHelper {
 		Files.deleteIfExists(Paths.get(tempDirectory.toString(), "pom.xml"));
 		Files.deleteIfExists(tempDirectory);
 	}
-	
+
 	public Integer cleanupTempFolders() throws IOException {
 		Integer count = new Integer(0);
 		try (Stream<Path> tmpFolders = Files.list(Paths.get(System.getProperty("java.io.tmpdir")))) {
@@ -228,23 +158,7 @@ public class MavenClasspathHelper {
 		}
 		return count;
 	}
-	
-	private String parseClasspathFromMavenOutput(String commandOutput) throws IOException {
-		BufferedReader reader = new BufferedReader(new StringReader(commandOutput));
-		boolean useNextLine = true;
-		String result = null;
-		String line;
-		while ((line = reader.readLine()) != null) {
-			if (useNextLine) {
-				useNextLine = false;
-				result = line;
-			}
-			if (line.startsWith("[INFO] Dependencies classpath:")) {
-				useNextLine = true;
-			}
-		}
-		return result;
-	}
+
 
 	public long getProcessCheckInterval() {
 		return processCheckInterval;
@@ -262,15 +176,4 @@ public class MavenClasspathHelper {
 		this.processMaxExecutionTime = processMaxExecutionTime;
 	}
 
-	public String getBaseFolder() {
-		return baseFolder;
-	}
-
-	public void setBaseFolder(String baseFolder) {
-		this.baseFolder = baseFolder;
-	}
-
-	protected String generateJavaCommand() {
-		return System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
-	}
 }

@@ -25,7 +25,7 @@ dependencies:
   - ./mvnw --batch-mode -Pfull -Pfabric8 -Dfabric8.skip -DskipTests package dependency:go-offline
 test:
   override:
-  - ./mvnw --batch-mode -Pfull -Pfabric8 -Dfabric8.mode=kubernetes install 
+  - MAVEN_OPTS="-Xmx1G -XX:MaxPermSize=.2G" ./mvnw --batch-mode -Pfull -Pfabric8 -Dfabric8.mode=kubernetes install 
   post:
   - mkdir -p $CIRCLE_TEST_REPORTS/junit/
   - find . -type f -regex ".*/target/.*-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;

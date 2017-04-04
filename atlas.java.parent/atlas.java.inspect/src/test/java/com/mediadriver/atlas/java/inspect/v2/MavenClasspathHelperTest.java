@@ -1,28 +1,19 @@
 package com.mediadriver.atlas.java.inspect.v2;
 
-import static org.junit.Assert.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Stream;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.junit.Assert.*;
 
-@Ignore
 public class MavenClasspathHelperTest {
 
 	private MavenClasspathHelper mavenClasspathHelper = null;
@@ -55,7 +46,8 @@ public class MavenClasspathHelperTest {
 		List<String> cmd = new LinkedList<String>();
 		cmd.add(workingDirectory.toString() + File.separator + "test-timeout.sh");
 
-		mavenClasspathHelper.executeMavenProcess(workingDirectory.toString(), cmd);
+		mavenClasspathHelper.setProcessMaxExecutionTime(5000);
+		mavenClasspathHelper.executeMavenProcess(workingDirectory, cmd);
 		fail("Expected IOException to indicate process timeout exceeded");
 	}
 	
