@@ -25,21 +25,18 @@ import com.mediadriver.atlas.v2.FieldType;
 import com.mediadriver.atlas.v2.StringList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xeustechnologies.jcl.JarClassLoader;
-import org.xeustechnologies.jcl.exception.JclException;
+
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Paths;
+import java.util.*;
 
 public class ClassInspectionService implements Serializable {
 
@@ -155,7 +152,7 @@ public class ClassInspectionService implements Serializable {
 		return packageNames;
 	}
 
-	public Map<String,JavaClass> inspectClasses(List<String> classNames) {
+	public Map<String,JavaClass> inspectClasses(List<String> classNames) throws InspectionException {
 		Map<String,JavaClass> classes = new HashMap<>();
 		for (String c : classNames) {
 			JavaClass d = inspectClass(c);
@@ -164,65 +161,79 @@ public class ClassInspectionService implements Serializable {
 		return classes;
 	}
 
-	public JavaClass inspectClass(String className) {
-		JavaClass d = null;
-		Class<?> clazz = null;
-		try {
-			clazz = Class.forName(className);
-			d = inspectClass(clazz);
-		} catch (ClassNotFoundException cnfe) {
-			d = AtlasJavaModelFactory.createJavaClass();
-			d.setClassName(className);
-			d.setStatus(FieldStatus.NOT_FOUND);
-		}
-		return d;
+	public JavaClass inspectClass(String className) throws InspectionException {
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		if( loader == null ) {
+            loader = getClass().getClassLoader();
+        }
+        return inspectClass(loader, className);
 	}
 
-	public JavaClass inspectClass(String className, String classpath) throws InspectionException {
-
+    public JavaClass inspectClass(String className, String classpath) throws InspectionException {
 		if(className == null || classpath == null) {
 			throw new InspectionException("ClassName and Classpath must be specified");
 		}
+		// URLClassLoader is auto closable.
+        try( URLClassLoader classLoader = createClassLoader(classpath) ) {
+            return inspectClass(classLoader, className);
+        } catch (IOException e) {
+            throw new InspectionException("Could not close the classloader");
+        }
+    }
 
-		JavaClass d = null;
-		Class<?> clazz = null;
-		JarClassLoader jcl = null;
-		try {
-			jcl = new JarClassLoader( new String[] { "target/reference-jars" } );
-			clazz = jcl.loadClass(className);
-			d = inspectClass(clazz);
-		} catch (ClassNotFoundException cnfe) {
-			d = AtlasJavaModelFactory.createJavaClass();
-			d.setClassName(className);
-			d.setStatus(FieldStatus.NOT_FOUND);
-		} finally {
-			if(jcl != null) {
-				try {
-					jcl.unloadClass(className);
-				} catch (JclException e) {
-					if(e.getCause() != null) {
-						logger.warn("Error unloading class " + className + " msg: " + e.getCause().getMessage(), e.getCause());
-					} else {
-						logger.warn("Error unloading class " + className + " msg: " + e.getMessage(), e);
-					}
-				}
-			}
-			jcl = null;
-		}
-		return d;
-	}
+    private URLClassLoader createClassLoader(String classpath) {
+        URL[] urls = Arrays.stream(classpath.split(":")).map(x -> {
+            try {
+                return Paths.get(x).toUri().toURL();
+            } catch (MalformedURLException e) {
+                throw new RuntimeException("Could not get URL to jar file: " + x, e);
+            }
+        }).toArray(x -> new URL[x]);
 
-	public JavaClass inspectClass(Class<?> clazz) {
+        // In a Spring Boot app, our classes are NOT loaded by the System classloader!  The System
+        // class loader just has a few launcher classes.  So lets make the parent of the classloader
+        // System classloader since that has a much smaller conflicting with the classes that we
+        // are goign to introspect.
+        ClassLoader parent = ClassLoader.getSystemClassLoader();
+        return new URLClassLoader(urls, parent);
+    }
+
+    private JavaClass inspectClass(ClassLoader loader, String className) throws InspectionException {
+        if(className == null || loader == null) {
+            throw new InspectionException("ClassName and ClassLoader must be specified");
+        }
+        Class<?> clazz;
+        JavaClass d = null;
+        try {
+            clazz = loader.loadClass(className);
+            d = inspectClass(clazz);
+        } catch (ClassNotFoundException cnfe) {
+            d = AtlasJavaModelFactory.createJavaClass();
+            d.setClassName(className);
+            d.setStatus(FieldStatus.NOT_FOUND);
+        }
+        return d;
+    }
+
+    public JavaClass inspectClass(Class<?> clazz) {
+        ClassLoader loader = clazz.getClassLoader();
+        if( loader==null ) {
+            loader = getClass().getClassLoader();
+        }
+        return inspectClass(loader, clazz);
+    }
+
+	public JavaClass inspectClass(ClassLoader loader, Class<?> clazz) {
 		if(clazz == null) {
 			throw new IllegalArgumentException("Class must be specified");
 		}
 
 		JavaClass javaClass = AtlasJavaModelFactory.createJavaClass();
-		inspectClass(clazz, javaClass, new HashSet<String>());
+		inspectClass(loader, clazz, javaClass, new HashSet<String>());
 		return javaClass;
 	}
 
-	protected void inspectClass(Class<?> clazz, JavaClass javaClass, Set<String> cachedClasses) {
+	protected void inspectClass(ClassLoader loader, Class<?> clazz, JavaClass javaClass, Set<String> cachedClasses) {
 
 		Class<?> clz = clazz;
 		if(clazz.isArray()) {
@@ -257,7 +268,7 @@ public class ClassInspectionService implements Serializable {
 				if (Enum.class.isAssignableFrom(f.getType())) {
 					continue;
 				}
-				JavaField s = inspectField(f, cachedClasses);
+				JavaField s = inspectField(loader, f, cachedClasses);
 
 				if(getFieldBlacklist().contains(f.getName())) {
 					s.setStatus(FieldStatus.BLACK_LIST);
@@ -313,11 +324,11 @@ public class ClassInspectionService implements Serializable {
 				}
 
 				if(m.getName().startsWith("get") || m.getName().startsWith("is")) {
-					s = inspectGetMethod(m, s, cachedClasses);
+					s = inspectGetMethod(loader, m, s, cachedClasses);
 				}
 
 				if(m.getName().startsWith("set")) {
-					s = inspectSetMethod(m, s, cachedClasses);
+					s = inspectSetMethod(loader, m, s, cachedClasses);
 				}
 
 				boolean found = false;
@@ -358,9 +369,8 @@ public class ClassInspectionService implements Serializable {
 		//return javaClass;
 	}
 
-	protected JavaField inspectGetMethod(Method m, JavaField s, Set<String> cachedClasses) {
-
-		s.setName(StringUtil.removeGetterAndLowercaseFirstLetter(m.getName()));
+	protected JavaField inspectGetMethod(ClassLoader loader, Method m, JavaField s, Set<String> cachedClasses) {
+        s.setName(StringUtil.removeGetterAndLowercaseFirstLetter(m.getName()));
 
 		if(m.getParameterCount() != 0) {
 			s.setStatus(FieldStatus.UNSUPPORTED);
@@ -403,9 +413,9 @@ public class ClassInspectionService implements Serializable {
 				s.setStatus(FieldStatus.UNSUPPORTED);
 			} else if(!cachedClasses.contains(returnType.getCanonicalName())) {
 				try {
-					complexClazz = Class.forName(returnType.getCanonicalName());
+					complexClazz = loader.loadClass(returnType.getCanonicalName());
 					cachedClasses.add(returnType.getCanonicalName());
-					inspectClass(complexClazz, tmpField, cachedClasses);
+					inspectClass(loader, complexClazz, tmpField, cachedClasses);
 					if(tmpField.getStatus() == null) {
 						s.setStatus(FieldStatus.SUPPORTED);
 					}
@@ -420,9 +430,8 @@ public class ClassInspectionService implements Serializable {
 		return s;
 	}
 
-	protected JavaField inspectSetMethod(Method m, JavaField s, Set<String> cachedClasses) {
-
-		s.setName(StringUtil.removeSetterAndLowercaseFirstLetter(m.getName()));
+	protected JavaField inspectSetMethod(ClassLoader loader, Method m, JavaField s, Set<String> cachedClasses) {
+        s.setName(StringUtil.removeSetterAndLowercaseFirstLetter(m.getName()));
 
 		if(m.getParameterCount() != 1) {
 			s.setStatus(FieldStatus.UNSUPPORTED);
@@ -471,9 +480,9 @@ public class ClassInspectionService implements Serializable {
 				s.setStatus(FieldStatus.UNSUPPORTED);
 			} else if(!cachedClasses.contains(paramType.getCanonicalName())) {
 				try {
-					complexClazz = Class.forName(paramType.getCanonicalName());
+					complexClazz = loader.loadClass(paramType.getCanonicalName());
 					cachedClasses.add(paramType.getCanonicalName());
-					inspectClass(complexClazz, tmpField, cachedClasses);
+					inspectClass(loader, complexClazz, tmpField, cachedClasses);
 					if(tmpField.getStatus() == null) {
 						s.setStatus(FieldStatus.SUPPORTED);
 					}
@@ -488,9 +497,8 @@ public class ClassInspectionService implements Serializable {
 		return s;
 	}
 
-	protected JavaField inspectField(Field f, Set<String> cachedClasses) {
-
-		JavaField s = AtlasJavaModelFactory.createJavaField();
+	protected JavaField inspectField(ClassLoader loader, Field f, Set<String> cachedClasses) {
+        JavaField s = AtlasJavaModelFactory.createJavaField();
 		Class<?> clazz = f.getType();
 
 		if(clazz.isArray()) {
@@ -523,9 +531,9 @@ public class ClassInspectionService implements Serializable {
 				s.setStatus(FieldStatus.UNSUPPORTED);
 			} else if(!cachedClasses.contains(clazz.getCanonicalName())) {
 				try {
-					complexClazz = Class.forName(clazz.getCanonicalName());
+					complexClazz = loader.loadClass(clazz.getCanonicalName());
 					cachedClasses.add(clazz.getCanonicalName());
-					inspectClass(complexClazz, tmpField, cachedClasses);
+					inspectClass(loader, complexClazz, tmpField, cachedClasses);
 					if(tmpField.getStatus() == null) {
 						s.setStatus(FieldStatus.SUPPORTED);
 					}
