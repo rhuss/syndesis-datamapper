@@ -46,6 +46,7 @@ public class MavenClasspathHelper {
 			Files.write(workingDirectory.resolve("pom.xml"), pom);
 			ArrayList<String> args = new ArrayList<>();
 			args.add("mvn");
+            args.add("--batch-mode");
 			args.add("org.apache.maven.plugins:maven-dependency-plugin:3.0.0:build-classpath");
 			args.add("-DincludeScope=runtime");
 			// In case we ever want to configure were the local mvn repo lives:
