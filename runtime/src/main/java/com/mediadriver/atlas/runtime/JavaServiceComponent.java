@@ -15,15 +15,41 @@
  */
 package com.mediadriver.atlas.runtime;
 
+import com.mediadriver.atlas.java.inspect.v2.MavenClasspathHelper;
 import com.mediadriver.atlas.java.service.v2.JavaService;
+import com.mediadriver.atlas.java.v2.MavenClasspathRequest;
+import com.mediadriver.atlas.java.v2.MavenClasspathResponse;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.Path;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 @Component
 @ApplicationPath("/v2/atlas")
 @Path("/java")
 public class JavaServiceComponent extends JavaService {
 
+    /**
+     * Stub out mavenclasspath processing for now.
+     *
+     * @param request
+     * @return
+     * @throws Exception
+     */
+    @POST
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    @Path("/mavenclasspath")
+    public Response generateClasspath(MavenClasspathRequest request) throws Exception {
+        MavenClasspathResponse response = new MavenClasspathResponse();
+        response.setExecutionTime(0L);
+        response.setClasspath("");
+        return Response.ok()
+            .header("Access-Control-Allow-Origin", "*")
+            .header("Access-Control-Allow-Headers", "Content-Type")
+            .header("Access-Control-Allow-Methods", "GET,PUT,POST,PATCH,DELETE")
+            .entity(response)
+            .build();
+    }
 }
