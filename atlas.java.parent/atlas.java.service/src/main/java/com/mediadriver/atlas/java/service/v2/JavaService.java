@@ -149,7 +149,7 @@ public class JavaService extends Application {
 		long startTime = System.currentTimeMillis();
     	try {
     		JavaClass c = null;
-    		if(request.getClasspath() == null) {
+    		if(request.getClasspath() == null || request.getClasspath().isEmpty()) {
     			c = classInspectionService.inspectClass(request.getClassName());
     		} else {
     			c = classInspectionService.inspectClass(request.getClassName(), request.getClasspath());
