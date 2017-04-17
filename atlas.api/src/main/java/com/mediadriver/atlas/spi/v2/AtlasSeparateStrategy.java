@@ -15,23 +15,12 @@
  */
 package com.mediadriver.atlas.spi.v2;
 
-import com.mediadriver.atlas.api.v2.AtlasException;
-import com.mediadriver.atlas.api.v2.AtlasSession;
-import com.mediadriver.atlas.v2.Field;
-
 import java.util.List;
 
-public interface AtlasModule {
+public interface AtlasSeparateStrategy {
 
-	void init();
-	void destroy();
-	void processInput(AtlasSession session) throws AtlasException;
-	void processOutput(AtlasSession session) throws AtlasException;
-	AtlasModuleMode getMode();
-	void setMode(AtlasModuleMode atlasModuleMode);
-	List<AtlasModuleMode> listSupportedModes();
-	Boolean isStatisticsSupported();
-	Boolean isStatisticsEnabled();
-	Boolean isSupportedField(Field field);
-
+	String getName();
+	String getDelimiter();
+	void setDelimiter(String delimiter);
+	List<String> separateValue(String value, String delimiter, Integer limit);
 }

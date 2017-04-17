@@ -15,19 +15,11 @@
  */
 package com.mediadriver.atlas.api.v2;
 
-import com.mediadriver.atlas.v2.AtlasMapping;
+public class AtlasConversionException extends AtlasException {
 
-import java.io.File;
-import java.net.URI;
-import java.util.Map;
-
-public interface AtlasContextFactory {
-
-	void init();
-	void destroy();
-	AtlasContext createContext(File atlasMappingFile) throws AtlasException;
-	AtlasContext createContext(URI atlasMappingUri) throws AtlasException;
-	AtlasContext createContext(AtlasMapping atlasMapping) throws AtlasException;
-	void setProperties(Map<String, String> properties);
-	Map<String, String> getProperties();
+	private static final long serialVersionUID = -8909275615751481096L;
+	public AtlasConversionException() { super(); }
+	public AtlasConversionException(String message, Throwable cause) { super(message, cause); }
+	public AtlasConversionException(String message) { super(message); }
+	public AtlasConversionException(Throwable cause) { super(cause); }
 }
