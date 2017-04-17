@@ -1,12 +1,12 @@
 /**
  * Copyright (C) 2017 Red Hat, Inc.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,7 +27,7 @@ public abstract class BaseMappingTest {
     protected com.mediadriver.atlas.java.v2.ObjectFactory javaModelFactory = new com.mediadriver.atlas.java.v2.ObjectFactory();
     protected AtlasMappingUtil mappingUtil = new AtlasMappingUtil();
 
-    protected AtlasMapping getMappingFullValid() throws Exception {
+    protected AtlasMapping getAtlasMappingFullValid() throws Exception {
         AtlasMapping mapping = AtlasModelFactory.createAtlasMapping();
 
         mapping.setName("thisis_a_valid.name");
@@ -107,6 +107,43 @@ public abstract class BaseMappingTest {
         outMappedField.setField(outMockField);
         ((MapFieldMapping) mapFieldMapping).setOutputField(outMappedField);
         mapping.setFieldMappings(fieldMappings);
+    }
+
+    protected AtlasMapping getAtlasMappingWithLookupTables(String... names) throws Exception {
+        AtlasMapping mapping = this.getAtlasMappingFullValid();
+        LookupTables lookupTables = new LookupTables();
+        mapping.setLookupTables(lookupTables);
+        for (String name : names) {
+            LookupTable lookupTable = AtlasModelFactory.createLookupTable();
+            lookupTable.setName(name);
+            lookupTable.setDescription("desc_".concat(name));
+            lookupTable.setLookupEntryList(new LookupEntryList());
+            lookupTables.getLookupTable().add(lookupTable);
+
+            LookupFieldMapping lookupFieldMapping = AtlasModelFactory.createFieldMapping(LookupFieldMapping.class);
+            lookupFieldMapping.setDescription("field_desc_".concat(name));
+            lookupFieldMapping.setLookupTableName(name);
+
+            MappedField inputMappedField = AtlasModelFactory.createMappedField();
+            createInputJavaField(inputMappedField, "inputName");
+
+            MappedField outMappedField = AtlasModelFactory.createMappedField();
+            createInputJavaField(outMappedField, "outputName");
+
+            lookupFieldMapping.setInputField(inputMappedField);
+            lookupFieldMapping.setOutputField(outMappedField);
+            mapping.getFieldMappings().getFieldMapping().add(lookupFieldMapping);
+        }
+
+        return mapping;
+    }
+
+    protected void createInputJavaField(MappedField inputMappedField, String inputName) {
+        JavaField inputJavaField = javaModelFactory.createJavaField();
+        inputJavaField.setType(FieldType.STRING);
+        inputJavaField.setClassName("java.lang.String");
+        inputJavaField.setName(inputName);
+        inputMappedField.setField(inputJavaField);
     }
 
     protected void debugErrors(Errors mappingErrors) {
