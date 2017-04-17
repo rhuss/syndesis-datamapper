@@ -20,6 +20,8 @@ import com.mediadriver.atlas.api.v2.AtlasSession;
 import com.mediadriver.atlas.spi.v2.AtlasModule;
 import com.mediadriver.atlas.spi.v2.AtlasModuleDetail;
 import com.mediadriver.atlas.spi.v2.AtlasModuleMode;
+import com.mediadriver.atlas.v2.Field;
+import com.mediadriver.atlas.v2.MockField;
 
 import java.util.List;
 
@@ -80,5 +82,11 @@ public class MockModule implements AtlasModule {
 		return null;
 	}
 
-	
+	@Override
+	public Boolean isSupportedField(Field field) {
+		if(field instanceof MockField) {
+			return true;
+		}
+		return false;
+	}
 }

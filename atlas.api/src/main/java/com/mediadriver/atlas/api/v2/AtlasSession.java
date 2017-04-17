@@ -23,6 +23,8 @@ import java.util.Map;
 public interface AtlasSession {
 
 	Map<String, Object> getProperties();
+	AtlasContext getAtlasContext();
+	void setAtlasContext(AtlasContext atlasContext);
 	AtlasMapping getAtlasMapping();
 	void setAtlasMapping(AtlasMapping atlasMapping);
 	Object getInput();

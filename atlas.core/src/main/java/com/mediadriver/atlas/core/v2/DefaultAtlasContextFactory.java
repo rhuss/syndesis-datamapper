@@ -22,6 +22,7 @@ import com.mediadriver.atlas.mxbean.v2.AtlasContextFactoryMXBean;
 import com.mediadriver.atlas.spi.v2.AtlasModule;
 import com.mediadriver.atlas.spi.v2.AtlasModuleDetail;
 import com.mediadriver.atlas.spi.v2.AtlasModuleInfo;
+import com.mediadriver.atlas.spi.v2.AtlasSeparateStrategy;
 import com.mediadriver.atlas.v2.AtlasMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +32,12 @@ import javax.management.ObjectName;
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Constructor;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +54,7 @@ public class DefaultAtlasContextFactory implements AtlasContextFactory, AtlasCon
 	private String threadName = null;
 	private ObjectName objectName = null;
 	private List<AtlasModuleInfo> modules = new ArrayList<AtlasModuleInfo>();
+	private AtlasSeparateStrategy separateStrategy = new DefaultAtlasSeparateStrategy();
 	private AtlasMappingService atlasMappingService = null;
 	private Map<String, String> properties = null;
 
@@ -67,6 +71,14 @@ public class DefaultAtlasContextFactory implements AtlasContextFactory, AtlasCon
 	public DefaultAtlasContextFactory(Map<String, String> properties) {
 		this.properties = properties;
 		init(properties);
+	}
+	
+	public DefaultAtlasContextFactory(Properties properties) {
+		Map<String, String> tmpProps = new HashMap<String, String>();
+		for (final String name: properties.stringPropertyNames()) {
+			tmpProps.put(name, properties.getProperty(name));
+		}
+		setProperties(tmpProps);
 	}
 	
 	public void init() {
@@ -110,12 +122,20 @@ public class DefaultAtlasContextFactory implements AtlasContextFactory, AtlasCon
 		factory = null;
 	}
 	
-	public AtlasContext createContext(File file) throws AtlasException {
+	public AtlasContext createContext(File atlasMappingFile) throws AtlasException {
 		if(getMappingService() == null) {
 			throw new AtlasException("AtlasMappingService is not set");
 		}
 		
-		return createContext(getMappingService().loadMapping(file));
+		return createContext(getMappingService().loadMapping(atlasMappingFile));
+	}
+	
+	public AtlasContext createContext(URI atlasMappingUri) throws AtlasException {
+		if(getMappingService() == null) {
+			throw new AtlasException("AtlasMappingService is not set");
+		}
+		
+		return createContext(getMappingService().loadMapping(atlasMappingUri));
 	}
 	
 	public AtlasContext createContext(AtlasMapping atlasMapping) throws AtlasException {
@@ -351,6 +371,10 @@ public class DefaultAtlasContextFactory implements AtlasContextFactory, AtlasCon
 		return factory;
 	}
 
+	public AtlasSeparateStrategy getSeparateStrategy() {
+		return this.separateStrategy;
+	}
+	
 	public List<AtlasModuleInfo> getModules() {
 		return this.modules;
 	}
