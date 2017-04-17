@@ -100,6 +100,8 @@
 					<element name="OutputFields" type="atlas:MappedFields" minOccurs="0" maxOccurs="1" />
 				</sequence>
 				<attribute name="strategy" type="string" use="optional" />
+				<attribute name="delimiterName" type="string" use="optional" />
+				<attribute name="delimiterValue" type="string" use="optional" />
 			</extension>
 		</complexContent>
 	</complexType>

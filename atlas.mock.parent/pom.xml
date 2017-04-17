@@ -42,6 +42,7 @@
 		</profile>
 		<profile>
 			<id>full</id>
+			<activation><activeByDefault>true</activeByDefault></activation>
 			<modules>
 				<module>atlas.mock.model</module>
 				<module>atlas.mock.module</module>

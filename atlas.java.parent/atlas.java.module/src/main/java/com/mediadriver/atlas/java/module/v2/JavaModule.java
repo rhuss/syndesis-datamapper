@@ -15,10 +15,14 @@
  */
 package com.mediadriver.atlas.java.module.v2;
 
+import com.mediadriver.atlas.api.v2.AtlasContextFactory;
+import com.mediadriver.atlas.api.v2.AtlasConversionException;
 import com.mediadriver.atlas.api.v2.AtlasException;
 import com.mediadriver.atlas.api.v2.AtlasNotFoundException;
 import com.mediadriver.atlas.api.v2.AtlasSession;
 import com.mediadriver.atlas.core.v2.AtlasUtil;
+import com.mediadriver.atlas.core.v2.DefaultAtlasContextFactory;
+import com.mediadriver.atlas.core.v2.StringDelimiter;
 import com.mediadriver.atlas.java.v2.JavaField;
 import com.mediadriver.atlas.javapath.v2.JavaPath;
 import com.mediadriver.atlas.spi.v2.AtlasModule;
@@ -105,7 +109,7 @@ public class JavaModule implements AtlasModule {
 			MappedField sourceMappedField = null;
 			MappedField targetMappedField = null;
 			Field sourceField = null;
-			Field targetField = null;
+			JavaField targetField = null;
 			Object sourceValue = null;
 			
 			for(FieldMapping fieldMapping : fieldMappingList) {
@@ -115,30 +119,29 @@ public class JavaModule implements AtlasModule {
 					sourceField = sourceMappedField.getField();
 					sourceValue = sourceField.getValue();
 					
-					targetField = targetMappedField.getField();
-					if(targetField instanceof JavaField) {
-						JavaField jtf = (JavaField)targetField;
-					
-						Method targetMethod = targetClazz.getDeclaredMethod(jtf.getSetMethod(), AtlasModelFactory.classFromFieldType(jtf.getType()));
-						targetMethod.invoke(targetObject, sourceValue);
-					}				
+					targetField = (JavaField)targetMappedField.getField();
+					Method targetMethod = targetClazz.getDeclaredMethod(targetField.getSetMethod(), AtlasModelFactory.classFromFieldType(targetField.getType()));
+					targetMethod.invoke(targetObject, sourceValue);				
 				} else if(fieldMapping instanceof SeparateFieldMapping) {
 					sourceMappedField = ((SeparateFieldMapping)fieldMapping).getInputField();
 					sourceField = sourceMappedField.getField();
 					sourceValue = sourceField.getValue();
-					List<Object> sourceValues = separateValue(sourceValue);
+					
+					// TODO wire-in runtime audit logger
+					if(!(sourceValue instanceof String)) {
+						
+					}
+					
+					List<String> sourceValues = separateValue(session, (String)sourceValue, ((SeparateFieldMapping)fieldMapping).getDelimiterValue());
 					
 					for(MappedField tmpTargetMappedField : ((SeparateFieldMapping)fieldMapping).getOutputFields().getMappedField()) {
-						targetField = tmpTargetMappedField.getField();
-						if(targetField instanceof JavaField) {
-							JavaField jtf = (JavaField)targetField;
-							FieldActions fieldActions = tmpTargetMappedField.getFieldActions();
+						targetField = (JavaField)tmpTargetMappedField.getField();
+						FieldActions fieldActions = tmpTargetMappedField.getFieldActions();
 							
-							for(FieldAction fieldAction : fieldActions.getFieldAction()) {
-								if(fieldAction instanceof MapAction) {
-									Method targetMethod = targetClazz.getDeclaredMethod(jtf.getSetMethod(), AtlasModelFactory.classFromFieldType(jtf.getType()));
-									targetMethod.invoke(targetObject, sourceValues.get(((MapAction)fieldAction).getIndex()));
-								}
+						for(FieldAction fieldAction : fieldActions.getFieldAction()) {
+							if(fieldAction instanceof MapAction) {
+								Method targetMethod = targetClazz.getDeclaredMethod(targetField.getSetMethod(), AtlasModelFactory.classFromFieldType(targetField.getType()));
+								targetMethod.invoke(targetObject, sourceValues.get(((MapAction)fieldAction).getIndex()));
 							}
 						}
 					}				
@@ -168,15 +171,15 @@ public class JavaModule implements AtlasModule {
 		return tmpObject;
 	}
 	
-	protected List<Object> separateValue(Object value) {
+	protected List<String> separateValue(AtlasSession session, String value, String delimiter) throws AtlasConversionException {
 		
-		List<Object> values = new ArrayList<Object>();
-		if(value == null || !(value instanceof String)) {
-			return values;
+		AtlasContextFactory contextFactory = session.getAtlasContext().getContextFactory();
+		if(contextFactory instanceof DefaultAtlasContextFactory) {
+			return ((DefaultAtlasContextFactory)contextFactory).getSeparateStrategy().separateValue(value, delimiter, null);
+		} else {
+			throw new AtlasConversionException("No supported SeparateStrategy found");
 		}
-		
-		values.addAll(Arrays.asList(((String)value).split("\\s+", 512)));
-		return values;
+
 	}
 
 	@Override
@@ -209,5 +212,11 @@ public class JavaModule implements AtlasModule {
 		return null;
 	}
 
-	
+	@Override
+	public Boolean isSupportedField(Field field) {
+		if(field instanceof JavaField) {
+			return true;
+		}
+		return false;
+	}
 }

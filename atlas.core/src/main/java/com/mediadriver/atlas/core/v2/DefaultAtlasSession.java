@@ -15,6 +15,7 @@
  */
 package com.mediadriver.atlas.core.v2;
 
+import com.mediadriver.atlas.api.v2.AtlasContext;
 import com.mediadriver.atlas.api.v2.AtlasSession;
 import com.mediadriver.atlas.v2.AtlasMapping;
 
@@ -25,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultAtlasSession implements AtlasSession {
 
+	private AtlasContext atlasContext;
 	private AtlasMapping atlasMapping;
 	private Map<String, Object> properties;
 	private List<Map<String, Object>> data;
@@ -36,6 +38,8 @@ public class DefaultAtlasSession implements AtlasSession {
 	protected void initialize() { properties = new ConcurrentHashMap<String, Object>(); 
 								  data = new ArrayList<Map<String, Object>>(); }
 
+    public AtlasContext getAtlasContext() { return atlasContext; }
+    public void setAtlasContext(AtlasContext atlasContext) { this.atlasContext = atlasContext; }
     public AtlasMapping getAtlasMapping() { return atlasMapping; }
 	public void setAtlasMapping(AtlasMapping atlasMapping) { this.atlasMapping = atlasMapping; }
 	@Override

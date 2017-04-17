@@ -16,6 +16,7 @@
 package com.mediadriver.atlas.core.v2;
 
 import com.mediadriver.atlas.api.v2.AtlasContext;
+import com.mediadriver.atlas.api.v2.AtlasContextFactory;
 import com.mediadriver.atlas.api.v2.AtlasException;
 import com.mediadriver.atlas.api.v2.AtlasSession;
 import com.mediadriver.atlas.mxbean.v2.AtlasContextMXBean;
@@ -109,7 +110,7 @@ public class DefaultAtlasContext implements AtlasContext, AtlasContextMXBean {
 	
 	protected void registerJmx(DefaultAtlasContext context) {
 		try {
-			setJmxObjectName(new ObjectName(getFactory().getJmxObjectName()+",context=Contexts,uuid="+uuid.toString()));
+			setJmxObjectName(new ObjectName(getDefaultAtlasContextFactory().getJmxObjectName()+",context=Contexts,uuid="+uuid.toString()));
 			ManagementFactory.getPlatformMBeanServer().registerMBean(this, getJmxObjectName());
 			if(logger.isDebugEnabled()) {
 				logger.debug("Registered AtlasContext " + context.getUuid() + " with JMX");
@@ -150,8 +151,13 @@ public class DefaultAtlasContext implements AtlasContext, AtlasContextMXBean {
 		}
 	}
 	
-	protected DefaultAtlasContextFactory getFactory() { return this.factory; }
-	
+	protected DefaultAtlasContextFactory getDefaultAtlasContextFactory() { return this.factory; }
+		
+	@Override
+	public AtlasContextFactory getContextFactory() {
+		return this.factory;
+	}
+
 	public AtlasMapping getAtlasMapping() {
 		return atlasMapping;
 	}
@@ -162,6 +168,7 @@ public class DefaultAtlasContext implements AtlasContext, AtlasContextMXBean {
 	
 	public AtlasSession createSession(AtlasMapping atlasMapping) {
 		AtlasSession session = new DefaultAtlasSession();
+		session.setAtlasContext(this);
 		session.setAtlasMapping(atlasMapping);
 		setDefaultSessionProperties(session);
 		return session;
