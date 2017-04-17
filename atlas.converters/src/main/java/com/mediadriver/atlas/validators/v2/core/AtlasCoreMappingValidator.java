@@ -1,12 +1,12 @@
 /**
  * Copyright (C) 2017 Red Hat, Inc.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,12 +19,15 @@ package com.mediadriver.atlas.validators.v2.core;
 import com.mediadriver.atlas.v2.AtlasMapping;
 import com.mediadriver.atlas.v2.FieldAction;
 import com.mediadriver.atlas.v2.FieldMapping;
+import com.mediadriver.atlas.v2.LookupFieldMapping;
+import com.mediadriver.atlas.v2.LookupTable;
 import com.mediadriver.atlas.v2.MapAction;
 import com.mediadriver.atlas.v2.MapFieldMapping;
 import com.mediadriver.atlas.v2.MappedField;
 import com.mediadriver.atlas.v2.SeparateFieldMapping;
 import com.mediadriver.atlas.validators.v2.CompositeValidator;
 import com.mediadriver.atlas.validators.v2.Errors;
+import com.mediadriver.atlas.validators.v2.LookupTableNameValidator;
 import com.mediadriver.atlas.validators.v2.NonNullValidator;
 import com.mediadriver.atlas.validators.v2.NotEmptyValidator;
 import com.mediadriver.atlas.validators.v2.PositiveIntegerValidator;
@@ -32,7 +35,12 @@ import com.mediadriver.atlas.validators.v2.StringPatternValidator;
 import com.mediadriver.atlas.validators.v2.Validator;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  */
@@ -64,6 +72,8 @@ public class AtlasCoreMappingValidator {
         NotEmptyValidator separateOutputNotEmptyFieldActionValidator = new NotEmptyValidator("SeparateFieldMapping.Output.Fields.FieldActions", "Field actions cannot be null or empty");
         PositiveIntegerValidator separateOutputMapActionPositiveIntegerValidator = new PositiveIntegerValidator("SeparateFieldMapping.Output.Fields.FieldActions.MapAction.Index", "MapAction index must exists and be greater than or equal to zero (0)");
 
+        LookupTableNameValidator lookupTableNameValidator = new LookupTableNameValidator("lookuptables.lookuptable.name", "LookupTables contain duplicated LookupTable names.");
+
 
         validatorMap.put("source.uri", sourceURINotNullOrEmptyValidator);
         validatorMap.put("target.uri", targetURINotNullOrEmptyValidator);
@@ -82,6 +92,7 @@ public class AtlasCoreMappingValidator {
         validatorMap.put("separate.output.field.not.null", separateOutputFieldNonNullValidator);
         validatorMap.put("separate.output.field.field.action.not.empty", separateOutputNotEmptyFieldActionValidator);
         validatorMap.put("separate.output.field.field.action.index.positive", separateOutputMapActionPositiveIntegerValidator);
+        validatorMap.put("lookuptable.name.check.for.duplicate", lookupTableNameValidator);
 
     }
 
@@ -107,49 +118,119 @@ public class AtlasCoreMappingValidator {
         validatorMap.get("field.names.not.null").validate(mapping.getFieldMappings(), errors);
         if (mapping.getFieldMappings() != null) {
             validatorMap.get("field.names.not.empty").validate(mapping.getFieldMappings().getFieldMapping(), errors, AtlasMappingError.Level.WARN);
-            if (mapping.getFieldMappings().getFieldMapping() != null && !mapping.getFieldMappings().getFieldMapping().isEmpty()) {
-                for (FieldMapping fieldMapping : mapping.getFieldMappings().getFieldMapping()) {
-                    if (fieldMapping.getClass().isAssignableFrom(MapFieldMapping.class)) {
-                        validateMappingFieldMapping((MapFieldMapping) fieldMapping);
-                    } else if (fieldMapping.getClass().isAssignableFrom(SeparateFieldMapping.class)) {
-                        validateSeparateFieldMapping((SeparateFieldMapping) fieldMapping);
-                    }
-                }
+
+            List<FieldMapping> fieldMappings = mapping.getFieldMappings().getFieldMapping();
+            if (fieldMappings != null && !fieldMappings.isEmpty()) {
+                List<MapFieldMapping> mapFieldMappings = fieldMappings.stream()
+                        .filter(p -> p instanceof MapFieldMapping)
+                        .map(p -> (MapFieldMapping) p)
+                        .collect(Collectors.toList());
+                List<SeparateFieldMapping> separateFieldMappings = fieldMappings.stream()
+                        .filter(p -> p instanceof SeparateFieldMapping)
+                        .map(p -> (SeparateFieldMapping) p)
+                        .collect(Collectors.toList());
+                List<LookupFieldMapping> lookupFieldMappings = fieldMappings.stream()
+                        .filter(p -> p instanceof LookupFieldMapping)
+                        .map(p -> (LookupFieldMapping) p)
+                        .collect(Collectors.toList());
+                validateMappingFieldMapping(mapFieldMappings);
+                validateSeparateFieldMapping(separateFieldMappings);
+                validateLookupTables(lookupFieldMappings);
             }
         }
     }
 
-    private void validateMappingFieldMapping(MapFieldMapping fieldMapping) {
-        validatorMap.get("input.not.null").validate(fieldMapping.getInputField(), errors);
-        if (fieldMapping.getInputField() != null) {
-            validatorMap.get("input.field.not.null").validate(fieldMapping.getInputField().getField(), errors);
-        }
-        validatorMap.get("output.not.null").validate(fieldMapping.getOutputField(), errors, AtlasMappingError.Level.WARN);
-        if (fieldMapping.getOutputField() != null) {
-            validatorMap.get("output.field.not.null").validate(fieldMapping.getOutputField().getField(), errors, AtlasMappingError.Level.WARN);
+    private void validateLookupTables(List<LookupFieldMapping> lookupFieldMappings) {
+        if (mapping.getLookupTables() != null && !mapping.getLookupTables().getLookupTable().isEmpty()) {
+            //check for duplicate names
+            validatorMap.get("lookuptable.name.check.for.duplicate").validate(mapping.getLookupTables(), errors);
+            if (lookupFieldMappings.isEmpty()) {
+                // is this an error?
+                errors.addError(new AtlasMappingError("lookup.fields.missing", null, "LookupTables are defined but no LookupFields are utilized.", AtlasMappingError.Level.WARN));
+            } else {
+                validateLookupFieldMapping(lookupFieldMappings, mapping.getLookupTables().getLookupTable());
+            }
         }
     }
 
-    private void validateSeparateFieldMapping(SeparateFieldMapping fieldMapping) {
-        validatorMap.get("separate.input.not.null").validate(fieldMapping.getInputField(), errors);
-        if (fieldMapping.getInputField() != null) {
-            validatorMap.get("separate.input.field.not.null").validate(fieldMapping.getInputField().getField(), errors);
-            // source must be a String type
+    //mapping field validations
+    private void validateLookupFieldMapping(List<LookupFieldMapping> fieldMappings, List<LookupTable> lookupTables) {
+        Set<String> lookupFieldMappingTableNameRefs =
+                fieldMappings.stream()
+                        .map(LookupFieldMapping::getLookupTableName)
+                        .collect(Collectors.toSet());
+
+        Set<String> tableNames = lookupTables.stream()
+                .map(LookupTable::getName).collect(Collectors.toSet());
+
+        if (!lookupFieldMappingTableNameRefs.isEmpty() && !tableNames.isEmpty()) {
+            Set<String> disjoint = Stream.concat(lookupFieldMappingTableNameRefs.stream(), tableNames.stream())
+                    .collect(Collectors.toMap(Function.identity(), t -> true, (a, b) -> null))
+                    .keySet();
+            if (!disjoint.isEmpty()) {
+
+                boolean isInFieldList = !lookupFieldMappingTableNameRefs.stream().filter(disjoint::contains).collect(Collectors.toList()).isEmpty();
+                boolean isInTableNameList = !tableNames.stream().filter(disjoint::contains).collect(Collectors.toList()).isEmpty();
+                //which list has the disjoin.... if its the lookup fields then ERROR
+                if (isInFieldList) {
+                    errors.addError(new AtlasMappingError("lookupfield.tablename", disjoint.toString(), "At least one LookupFieldMapping references a non existent LookupTable name in the mapping.", AtlasMappingError.Level.ERROR));
+                }
+
+                //check that if a name exists in table names that at least one field mapping uses it, else WARN
+                if (isInTableNameList) {
+                    errors.addError(new AtlasMappingError("lookupfield.tablename", disjoint.toString(), "A LookupTable is defined but not used by any LookupField.", AtlasMappingError.Level.WARN));
+                }
+            }
         }
 
-        validatorMap.get("separate.output.not.null").validate(fieldMapping.getOutputFields(), errors, AtlasMappingError.Level.WARN);
-        validatorMap.get("separate.output.not.empty").validate(fieldMapping.getOutputFields().getMappedField(), errors, AtlasMappingError.Level.WARN);
+        for (LookupFieldMapping fieldMapping : fieldMappings) {
+            if (fieldMapping.getInputField() != null) {
+                validatorMap.get("input.field.not.null").validate(fieldMapping.getInputField().getField(), errors);
+            }
+            validatorMap.get("output.not.null").validate(fieldMapping.getOutputField(), errors, AtlasMappingError.Level.WARN);
+            if (fieldMapping.getOutputField() != null) {
+                validatorMap.get("output.field.not.null").validate(fieldMapping.getOutputField().getField(), errors, AtlasMappingError.Level.WARN);
+            }
+        }
 
-        if (fieldMapping.getOutputFields() != null) {
-            for (MappedField mappedField : fieldMapping.getOutputFields().getMappedField()) {
-                validatorMap.get("separate.output.field.not.null").validate(mappedField.getFieldActions(), errors);
-                if (mappedField.getFieldActions() != null) {
-                    validatorMap.get("separate.output.field.field.action.not.empty").validate(mappedField.getFieldActions().getFieldAction(), errors);
-                    for (FieldAction fieldAction : mappedField.getFieldActions().getFieldAction()) {
-                        validatorMap.get("separate.output.field.field.action.index.positive").validate(((MapAction) fieldAction).getIndex(), errors);
+    }
+
+    private void validateMappingFieldMapping(List<MapFieldMapping> fieldMappings) {
+        for (MapFieldMapping fieldMapping : fieldMappings) {
+            validatorMap.get("input.not.null").validate(fieldMapping.getInputField(), errors);
+            if (fieldMapping.getInputField() != null) {
+                validatorMap.get("input.field.not.null").validate(fieldMapping.getInputField().getField(), errors);
+            }
+            validatorMap.get("output.not.null").validate(fieldMapping.getOutputField(), errors, AtlasMappingError.Level.WARN);
+            if (fieldMapping.getOutputField() != null) {
+                validatorMap.get("output.field.not.null").validate(fieldMapping.getOutputField().getField(), errors, AtlasMappingError.Level.WARN);
+            }
+        }
+    }
+
+    private void validateSeparateFieldMapping(List<SeparateFieldMapping> fieldMappings) {
+        for (SeparateFieldMapping fieldMapping : fieldMappings) {
+            validatorMap.get("separate.input.not.null").validate(fieldMapping.getInputField(), errors);
+            if (fieldMapping.getInputField() != null) {
+                validatorMap.get("separate.input.field.not.null").validate(fieldMapping.getInputField().getField(), errors);
+                // source must be a String type
+            }
+
+            validatorMap.get("separate.output.not.null").validate(fieldMapping.getOutputFields(), errors, AtlasMappingError.Level.WARN);
+            validatorMap.get("separate.output.not.empty").validate(fieldMapping.getOutputFields().getMappedField(), errors, AtlasMappingError.Level.WARN);
+
+            if (fieldMapping.getOutputFields() != null) {
+                for (MappedField mappedField : fieldMapping.getOutputFields().getMappedField()) {
+                    validatorMap.get("separate.output.field.not.null").validate(mappedField.getFieldActions(), errors);
+                    if (mappedField.getFieldActions() != null) {
+                        validatorMap.get("separate.output.field.field.action.not.empty").validate(mappedField.getFieldActions().getFieldAction(), errors);
+                        for (FieldAction fieldAction : mappedField.getFieldActions().getFieldAction()) {
+                            validatorMap.get("separate.output.field.field.action.index.positive").validate(((MapAction) fieldAction).getIndex(), errors);
+                        }
                     }
                 }
             }
         }
+
     }
 }

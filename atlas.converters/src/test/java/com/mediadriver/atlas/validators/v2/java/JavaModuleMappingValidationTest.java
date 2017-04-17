@@ -33,7 +33,7 @@ public class JavaModuleMappingValidationTest extends BaseMappingTest {
 
     @Test
     public void validateAtlasMappingFile_HappyPath() throws Exception {
-        AtlasMapping mapping = getMappingFullValid();
+        AtlasMapping mapping = getAtlasMappingFullValid();
         assertNotNull(mapping);
         JavaModuleMappingValidator validator = new JavaModuleMappingValidator(mapping);
         Errors mappingErrors = validator.validateAtlasMappingFile();
@@ -44,7 +44,7 @@ public class JavaModuleMappingValidationTest extends BaseMappingTest {
 
     @Test
     public void validateAtlasMappingFile_HappyPath2() throws Exception {
-        AtlasMapping mapping = getMappingFullValid();
+        AtlasMapping mapping = getAtlasMappingFullValid();
         assertNotNull(mapping);
         Errors mappingErrors = new AtlasMappingErrors();
         JavaModuleMappingValidator validator = new JavaModuleMappingValidator(mapping, mappingErrors);
