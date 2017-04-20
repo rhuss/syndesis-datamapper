@@ -126,6 +126,20 @@ public class AtlasMappingService implements Serializable {
         return atlasMapping;
     }
     
+    public void saveMappingAsFileJson(AtlasMapping atlasMapping, File file) throws AtlasValidationException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(SerializationFeature.WRAP_ROOT_VALUE, true);
+        objectMapper.configure(DeserializationFeature.UNWRAP_ROOT_VALUE, true);
+        objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+        objectMapper.setSerializationInclusion(Include.NON_NULL);
+
+        try {
+            objectMapper.writeValue(file, atlasMapping);
+        } catch (IOException e) {
+            throw new AtlasValidationException(e);
+        }
+    }
+    
     public AtlasMapping loadMapping(InputStream inputStream) throws AtlasValidationException {
         try {
             StreamSource streamSource = new StreamSource(inputStream);
