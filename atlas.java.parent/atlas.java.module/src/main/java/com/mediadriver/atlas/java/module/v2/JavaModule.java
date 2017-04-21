@@ -87,10 +87,12 @@ public class JavaModule implements AtlasModule {
 		if(javaField.getPath().contains(JavaPath.JAVAPATH_SEPARATOR)) {
 			Object parentObject = getParentObject(new JavaPath(javaField.getPath()), source);
 			Method parentGet = parentObject.getClass().getDeclaredMethod(javaField.getGetMethod());
+			parentGet.setAccessible(true);
 			sourceValue = parentGet.invoke(parentObject);
 			javaField.setValue(sourceValue);
 		} else {
 			Method getText = source.getClass().getMethod(javaField.getGetMethod());
+			getText.setAccessible(true);
 			javaField.setValue(getText.invoke(source));
 		}
 	}
@@ -121,6 +123,7 @@ public class JavaModule implements AtlasModule {
 					
 					targetField = (JavaField)targetMappedField.getField();
 					Method targetMethod = targetClazz.getDeclaredMethod(targetField.getSetMethod(), AtlasModelFactory.classFromFieldType(targetField.getType()));
+					targetMethod.setAccessible(true);
 					targetMethod.invoke(targetObject, sourceValue);				
 				} else if(fieldMapping instanceof SeparateFieldMapping) {
 					sourceMappedField = ((SeparateFieldMapping)fieldMapping).getInputField();
@@ -141,6 +144,7 @@ public class JavaModule implements AtlasModule {
 						for(FieldAction fieldAction : fieldActions.getFieldAction()) {
 							if(fieldAction instanceof MapAction) {
 								Method targetMethod = targetClazz.getDeclaredMethod(targetField.getSetMethod(), AtlasModelFactory.classFromFieldType(targetField.getType()));
+								targetMethod.setAccessible(true);
 								targetMethod.invoke(targetObject, sourceValues.get(((MapAction)fieldAction).getIndex()));
 							}
 						}
@@ -165,6 +169,7 @@ public class JavaModule implements AtlasModule {
 		int limit = javaPath.getSegments().size()-1;
 		for(int i=0; i < limit; i++) {
 			Method tmpMethod = tmpClass.getDeclaredMethod("get"+javaPath.getSegments().get(i));
+			tmpMethod.setAccessible(true);
 			tmpObject = tmpMethod.invoke(tmpObject);
 		}
 		
