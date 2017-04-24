@@ -19,7 +19,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.atlasmap</groupId>
 	<artifactId>atlas</artifactId>
-	<version>1.10.0-SNAPSHOT</version>
+	<version>1.10.0</version>
 	<packaging>pom</packaging>
 	<name>Atlas :: Project Build</name>
 
@@ -90,7 +90,8 @@
 		<connection>git:https://github.com/redhat-ipaas/ipaas-datamapper.git</connection>
 		<developerConnection>scm:git:git://github.com:redhat-ipaas/ipaas-datamapper.git</developerConnection>
 		<url>https://github.com/redhat-ipaas/ipaas-datamapper</url>
-	</scm>
+	  <tag>atlas-1.10.0</tag>
+  </scm>
 
 	<distributionManagement>
 		<snapshotRepository>
