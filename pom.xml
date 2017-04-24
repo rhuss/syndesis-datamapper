@@ -87,8 +87,8 @@
 		</developer>
 	</developers>
 	<scm>
-		<connection>git:https://github.com/redhat-ipaas/ipaas-datamapper.git</connection>
-		<developerConnection>scm:git:git://github.com:redhat-ipaas/ipaas-datamapper.git</developerConnection>
+		<connection>scm:git:git://github.com/redhat-ipaas/ipaas-datamapper.git</connection>
+		<developerConnection>scm:git:git@github.com:redhat-ipaas/ipaas-datamapper.git</developerConnection>
 		<url>https://github.com/redhat-ipaas/ipaas-datamapper</url>
 	  <tag>atlas-1.10.0</tag>
   </scm>
