@@ -88,8 +88,8 @@
 	</developers>
 	<scm>
 		<url>https://github.com/redhat-ipaas/ipaas-datamapper</url>
-		<connection>scm:git:git://github.com/redhat-ipaas/ipaas-datamapper.git</connection>
-		<developerConnection>scm:git:ssh://git@github.com/redhat-ipaas/ipaas-datamapper.git</developerConnection>
+		<connection>scm:git:https://github.com/redhat-ipaas/ipaas-datamapper.git</connection>
+		<developerConnection>scm:git:git@github.com:redhat-ipaas/ipaas-datamapper.git</developerConnection>
 		<tag>1.10.0</tag>
 	</scm>
 
