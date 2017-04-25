@@ -78,10 +78,3 @@ jobs:
 
             docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
             docker push atlasmap/ipaas-datamapper:${DOCKER_IMAGE_TAG} | cat -
-
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              curl -fsSL https://github.com/openshift/origin/releases/download/v1.5.0/openshift-origin-client-tools-v1.5.0-031cbe4-linux-64bit.tar.gz | tar xz -C /usr/bin --strip-components 1
-              oc login --server=${OPENSHIFT_APISERVER} --token=${OPENSHIFT_TOKEN}
-              oc project ipaas-staging
-              oc import-image --confirm atlasmap/ipaas-datamapper:${DOCKER_IMAGE_TAG}
-            fi
