@@ -1,5 +1,5 @@
-# ipaas-datamapper
-Atlas data mapper, design support services and ipaas UI module
+# syndesis-datamapper
+Atlas data mapper, design support services and Syndesis UI module
 
 To run:
 
