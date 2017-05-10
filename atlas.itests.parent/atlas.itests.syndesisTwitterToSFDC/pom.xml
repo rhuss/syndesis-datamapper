@@ -19,7 +19,7 @@
 	<name>Atlas :: iTests :: Syndesis Twitter to Salesforce</name>
 
 	<properties>
-		<syndesis.connector.version>0.4.2</syndesis.connector.version>
+		<syndesis.connector.version>0.4.4</syndesis.connector.version>
 		<camel.version>2.19.0</camel.version>
 	</properties>
 
