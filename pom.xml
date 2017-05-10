@@ -53,11 +53,11 @@
 		<at.jackson-module-jaxb-annotations.version>2.8.6</at.jackson-module-jaxb-annotations.version>
 		<spring-boot.version>1.5.2.RELEASE</spring-boot.version>
 		<resteasy-spring-boot-starter.version>2.3.0-RELEASE</resteasy-spring-boot-starter.version>
-        <fabric8-maven-plugin.version>3.2.30</fabric8-maven-plugin.version>
+    <fabric8-maven-plugin.version>3.2.30</fabric8-maven-plugin.version>
 
-        <!-- Controls Docker Image Generation -->
-        <from.image>registry.access.redhat.com/jboss-fuse-6/fis-java-openshift:2.0</from.image>
-        <docker.image>atlasmap/ipaas-datamapper:%l</docker.image>
+    <!-- Controls Docker Image Generation -->
+    <from.image>registry.access.redhat.com/jboss-fuse-6/fis-java-openshift:2.0</from.image>
+    <docker.image>atlasmap/syndesis-datamapper:%l</docker.image>
 	</properties>
 
 	<description>The AtlasMap Project</description>
@@ -70,26 +70,17 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
-	<developers>
-                <developer>
-                        <id>mattrpav</id>
-                        <name>Matt Pavlovich</name>
-                        <email>matt@mediadriver.com</email>
-                        <url>http://mediadriver.com</url>
-                        <timezone>-6</timezone>
-                </developer>
-		<developer>
-			<id>chirino</id>
-			<name>Hiram Chirino</name>
-			<email>hiram@hiramchirino.com</email>
-			<url>http://hiramchirino.com</url>
-			<timezone>-5</timezone>
-		</developer>
-	</developers>
+  <developers>
+    <developer>
+      <id>syndesis</id>
+      <name>Syndesis Development Team</name>
+      <organizationUrl>https://syndesis.io/</organizationUrl>
+    </developer>
+  </developers>
 	<scm>
-		<url>https://github.com/redhat-ipaas/ipaas-datamapper</url>
-		<connection>scm:git:https://github.com/redhat-ipaas/ipaas-datamapper.git</connection>
-		<developerConnection>scm:git:git@github.com:redhat-ipaas/ipaas-datamapper.git</developerConnection>
+		<url>https://github.com/syndesisio/syndesis-datamapper</url>
+		<connection>scm:git:https://github.com/syndesisio/syndesis-datamapper.git</connection>
+		<developerConnection>scm:git:git@github.com:syndesisio/syndesis-datamapper.git</developerConnection>
 		<tag>1.10.0</tag>
 	</scm>
 
@@ -181,7 +172,7 @@
 								</goals>
 							</execution>
 						</executions>
-					</plugin>				
+					</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -261,7 +252,7 @@
 					<artifactId>nexus-staging-maven-plugin</artifactId>
 					<version>${nexus-staging-maven-plugin.version}</version>
 				</plugin>
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
+				<!--This plugin's configuration is used to store Eclipse m2e settings
 					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
@@ -311,7 +302,7 @@
 							<exclude>**/src/main/webapp/angular2/src/app/lib/**</exclude>
 						</excludes>
 					</configuration>
-				</plugin>			
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>

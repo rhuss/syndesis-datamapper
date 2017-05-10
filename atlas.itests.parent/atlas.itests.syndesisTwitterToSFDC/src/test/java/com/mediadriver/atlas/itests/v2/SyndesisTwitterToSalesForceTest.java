@@ -29,7 +29,7 @@ import com.mediadriver.atlas.v2.MapAction;
 import com.mediadriver.atlas.v2.MapFieldMapping;
 import com.mediadriver.atlas.v2.MappedField;
 import com.mediadriver.atlas.v2.SeparateFieldMapping;
-import com.redhat.ipaas.connector.salesforce.Contact;
+import io.syndesis.connector.salesforce.Contact;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,9 +45,9 @@ import java.nio.file.Paths;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-public class iPaaSTwitterToSalesForceTest {
+public class SyndesisTwitterToSalesForceTest {
 
-	private static final Logger logger = LoggerFactory.getLogger(iPaaSTwitterToSalesForceTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(SyndesisTwitterToSalesForceTest.class);
 
 	private AtlasService atlasService = null;
 	private AtlasContextFactory atlasContextFactory = null;
@@ -75,7 +75,7 @@ public class iPaaSTwitterToSalesForceTest {
 
 		mapping.setName("twitterStatusToSalesforceContact");
 		mapping.setSourceUri("atlas:java?className=twitter4j.Status");
-		mapping.setTargetUri("atlas:java?className=com.redhat.ipaas.connector.salesforce.Contact");
+		mapping.setTargetUri("atlas:java?className=io.syndesis.connector.salesforce.Contact");
 
 		SeparateFieldMapping sepMapping = AtlasModelFactory.createFieldMapping(SeparateFieldMapping.class);
 		MappedField nameField = AtlasModelFactory.createMappedField();
@@ -157,15 +157,15 @@ public class iPaaSTwitterToSalesForceTest {
 
 		return mapping;
 	}
-	
-	
+
+
 	@Test
 	public void testProcessLoadedMapping() throws Exception {
 		String filename = "src/test/resources/atlasmapping-UI.820809.xml";
 		AtlasMapping mapping = atlasService.getMappingFromFile(filename);
 		verifyMappingProcessing(mapping);
 	}
-	
+
 	@Test
 	public void testProcessGeneratedMapping() throws Exception {
 		verifyMappingProcessing(generateMapping());
@@ -176,7 +176,7 @@ public class iPaaSTwitterToSalesForceTest {
 		AtlasSession session = context.createSession();
 		Status twitterStatus = generateTwitterStatus();
 		session.setInput(twitterStatus);
-		
+
 		System.out.println("Twitter.Status");
 		System.out.println("\tUser.name: " + twitterStatus.getUser().getName());
 		System.out.println("\tUser.screenName: " + twitterStatus.getUser().getScreenName());
@@ -187,8 +187,8 @@ public class iPaaSTwitterToSalesForceTest {
 		assertNotNull(session);
 		Object target = session.getOutput();
 		assertNotNull(target);
-		assertTrue("com.redhat.ipaas.connector.salesforce.Contact".equals(target.getClass().getCanonicalName()));
-		
+		assertTrue("io.syndesis.connector.salesforce.Contact".equals(target.getClass().getCanonicalName()));
+
 		System.out.println("SFDC.Contact");
 		System.out.println("\tFirstName: " + ((Contact)target).getFirstName());
 		System.out.println("\tLastName: " + ((Contact)target).getLastName());

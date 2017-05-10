@@ -33,8 +33,8 @@
     <failOnMissingWebXml>false</failOnMissingWebXml>
     <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
     <java-image.version>1.2</java-image.version>
-    <ipaas.connector.version>0.3.7</ipaas.connector.version>
-    <camel.version>2.19.0.fuse-000035</camel.version>
+    <syndesis.connector.version>0.4.2</syndesis.connector.version>
+    <camel.version>2.19.0</camel.version>
   </properties>
 
   <build>
@@ -154,51 +154,32 @@
 
     <!-- for now adding all connectors -->
     <dependency>
-      <groupId>com.redhat.ipaas</groupId>
+      <groupId>io.syndesis</groupId>
       <artifactId>twitter-mention-connector</artifactId>
-      <version>${ipaas.connector.version}</version>
+      <version>${syndesis.connector.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.redhat.ipaas</groupId>
+      <groupId>io.syndesis</groupId>
       <artifactId>salesforce-upsert-contact-connector</artifactId>
-      <version>${ipaas.connector.version}</version>
+      <version>${syndesis.connector.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.redhat.ipaas</groupId>
+      <groupId>io.syndesis</groupId>
       <artifactId>day-trade-get-connector</artifactId>
-      <version>${ipaas.connector.version}</version>
+      <version>${syndesis.connector.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.redhat.ipaas</groupId>
+      <groupId>io.syndesis</groupId>
       <artifactId>day-trade-place-connector</artifactId>
-      <version>${ipaas.connector.version}</version>
+      <version>${syndesis.connector.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.redhat.ipaas</groupId>
+      <groupId>io.syndesis</groupId>
       <artifactId>trade-insight-buy-connector</artifactId>
-      <version>${ipaas.connector.version}</version>
+      <version>${syndesis.connector.version}</version>
     </dependency>
 
   </dependencies>
-
-  <repositories>
-    <repository>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <id>ipaas-releases</id>
-      <name>ipaas-releases</name>
-      <url>https://dl.bintray.com/redhat-ipaas/maven/</url>
-    </repository>
-    <repository>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <id>jboss.ea</id>
-      <name>JBoss EA</name>
-      <url>https://repository.jboss.org/nexus/content/groups/ea</url>
-    </repository>
-  </repositories>
 
   <profiles>
     <profile>

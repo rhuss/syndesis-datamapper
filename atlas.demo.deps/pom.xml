@@ -28,12 +28,12 @@
 	<packaging>jar</packaging>
 	<name>Atlas :: Demo Dependencies</name>
 
-	<dependencies>	
+	<dependencies>
 		<dependency>
 		    <groupId>org.twitter4j</groupId>
 		    <artifactId>twitter4j-core</artifactId>
 		    <version>4.0.4</version>
-		</dependency>	
+		</dependency>
 		<dependency>
 	      <groupId>org.apache.camel</groupId>
 	      <artifactId>camel-salesforce</artifactId>
@@ -99,7 +99,7 @@
 									<version>${project.version}</version>
 									<overWrite>true</overWrite>
 									<outputDirectory>${project.build.directory}/</outputDirectory>
-								</artifactItem>						
+								</artifactItem>
 							</artifactItems>
 							<overWriteReleases>false</overWriteReleases>
 							<overWriteSnapshots>true</overWriteSnapshots>

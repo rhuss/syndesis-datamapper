@@ -16,7 +16,7 @@
     limitations under the License.
 
 -->
-<AtlasMapping xmlns="http://mediadriver.com/atlas/v2" xmlns:ns2="http://mediadriver.com/atlas/java/v2" name="UI.820809" sourceUri="atlas:java?className=twitter4j.Status" targetUri="atlas:java?className=com.redhat.ipaas.connector.salesforce.Contact">
+<AtlasMapping xmlns="http://mediadriver.com/atlas/v2" xmlns:ns2="http://mediadriver.com/atlas/java/v2" name="UI.820809" sourceUri="atlas:java?className=twitter4j.Status" targetUri="atlas:java?className=io.syndesis.connector.salesforce.Contact">
     <FieldMappings>
         <FieldMapping xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="MapFieldMapping">
             <InputField>

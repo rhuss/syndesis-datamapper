@@ -12,11 +12,11 @@ slave {
 
                     stage 'Build'
                     container(name: 'maven') {
-                        sh "mvn clean install fabric8:build -Dfabric8.mode=openshift -Dfabric8.namespace=ipaas-ci -Pfull"
+                        sh "mvn clean install fabric8:build -Dfabric8.mode=openshift -Dfabric8.namespace=syndesis-ci -Pfull"
                     }
 
                     stage 'System Tests'
-                    test(component: 'ipaas-rest', namespace: "${testingNamespace}", serviceAccount: 'jenkins')
+                    test(component: 'syndesis-rest', namespace: "${testingNamespace}", serviceAccount: 'jenkins')
                  }
 
         }
